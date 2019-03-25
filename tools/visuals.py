@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 
-def pca_results(good_data, pca):
+def pca_results(good_data, pca, image_file_name=None):
     '''
     Create a DataFrame of the PCA results
     Includes dimension feature weights and explained variance
@@ -45,6 +45,10 @@ def pca_results(good_data, pca):
     # Display the explained variance ratios
     for i, ev in enumerate(pca.explained_variance_ratio_):
         ax.text(i-0.40, ax.get_ylim()[1] + 0.05, "Explained Variance\n          %.4f"%(ev))
+
+
+    if image_file_name is not None:
+        plt.savefig(image_file_name)
 
     # Return a concatenated DataFrame
     return pd.concat([variance_ratios, components], axis = 1)
