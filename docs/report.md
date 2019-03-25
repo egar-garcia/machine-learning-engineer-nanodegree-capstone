@@ -9,10 +9,12 @@ bibliography: capstone_proposal.bib
 csl: ieee-with-url.csl
 ---
 
+
 # Stock Price Predictor
 
+
 ## I. Definition
-_(approx. 1-2 pages)_
+
 
 ### Project Overview
 
@@ -28,26 +30,31 @@ The stock exchange that are leading the U.S. include the New York Stock Exchange
 
 Projecting how the stock market will perform is a very difficult thing to do, there are so many factors involved in the prediction some of them emotional or irrational, which combined with the prices volatility make difficult to predict with a high degree of accuracy. Abundant information is available in the form of historical stock prices, which make this problem suitable for the use of machine learning algorithms.
 
+Investment firms, hedge funds and individuals have been using financial models to better understand the market behavior and attempt to make projections in order to make profitable investments and trades.
+
 
 ### Problem Statement
 
-Investment firms, hedge funds and individuals have been using financial models to better understand the market behavior and attempt to make projections in order to make profitable investments and trades.
+The purpose of this project is to build a stock price predictor, more specifically, the problem is to predict the closing price of a given company's stock in the trading days existing in a queried date range. For the scope of this project only the companies included in the Dow Jones Industrial Average are considered.
 
-The purpose of this project is to build a stock price predictor for companies in the DJIA, which takes historical stock data over a certain date range as input, and outputs projected estimates for given query dates.
+To address the problem a supervised learning approach is taken, the strategy to follow is to approach the problem as a particular case of forecasting in time series. As in supervised learning, a generalized function is tried to be inferred from the existing data which already contains the ground truth, the difference with this approach is that the existing data is in the past and the data to predict in the future, i.e. there is a clear separation of the predictor's values used for training and prediction, instead of being mixed and distributed along the possible set of values.
 
-To address the problem a supervised learning approach is going to be taken, at the end it can be seen as a problem of forecasting in time series, where a generalized function is inferred from the existing data which already contains ground truth.
+The different machine learning methods used in this project take historical stock data for a particular company over a certain date range (in the past) as training input, and outputs projected estimates for a given queried date range (in the future). The following ones are the methods taken in this project to address the problem of making predictions about how the closing stock prices will perform:
 
-The following ones are some approaches taken to address the problem of making predictions about how the stock prices will perform:
-
-* ARIMA: It is a very popular statistical method for time series forecasting that takes into account the past values to predict the future values. [@stock_price_arima]
+* ARIMA (autoregressive integrated moving average): It is a very popular statistical method for time series forecasting that takes into account the past values to predict the future values. [@stock_price_arima]
 * Prophet: It is a time series forecasting library designed and pioneered by Facebook, that is claimed to be extremely simple to implement. [@prophet_facebook] [@prophet_mongolian_stocks]
 * LSTM (Long Short Term Memory): It is a deep learning approach based in Recurrent Neural Networks (RNN) also used to make predictions in time series. [@stock_price_lstm_proc] [@stock_price_lstm]
 
 
 ### Metrics
-In this section, you will need to clearly define the metrics or calculations you will use to measure performance of a model or result in your project. These calculations and metrics should be justified based on the characteristics of the problem and problem domain. Questions to ask yourself when writing this section:
-- _Are the metrics you’ve chosen to measure the performance of your models clearly discussed and defined?_
-- _Have you provided reasonable justification for the metrics chosen based on the problem and solution?_
+
+To measure the performance of the predictions, the predicted value needs to be compared against the real value in the test and/or validation dataset, the predicted value is a (floating point) numerical value, thus using pure accuracy would not be convenient and not provide a useful description about how well the prediction is performing or improving through training iterations.
+
+Instead, a metric that can provide some sort of average of the total error would be more effective, since the purpose of the prediction is to get a value as close as possible to the real one, but it does not need to be the same to be useful. For this reason the Root Mean Square Error (RMSE) is going to be used as evaluation metric for this project.
+
+The formula to calculate the Root Mean Square Error is the following:
+$$ RMSE = \sqrt{ \frac{ \sum_{i=1}^{N} (\hat{y_i} - y_i)^2 } { N } } $$
+Where $N$ is the number of data points, $y_i$ is the observed value or ground truth for the datapoint $i$ and $\hat{y_i}$ is the predicted value for the data point $i$.
 
 
 ## II. Analysis
