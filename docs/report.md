@@ -58,22 +58,70 @@ Where $N$ is the number of data points, $y_i$ is the observed value or ground tr
 
 
 ## II. Analysis
-_(approx. 2-4 pages)_
 
 ### Data Exploration
-In this section, you will be expected to analyze the data you are using for the problem. This data can either be in the form of a dataset (or datasets), input data (or input files), or even an environment. The type of data should be thoroughly described and, if possible, have basic statistics and information presented (such as discussion of input features or defining characteristics about the input or environment). Any abnormalities or interesting qualities about the data that may need to be addressed have been identified (such as features that need to be transformed or the possibility of outliers). Questions to ask yourself when writing this section:
-- _If a dataset is present for this problem, have you thoroughly discussed certain features about the dataset? Has a data sample been provided to the reader?_
-- _If a dataset is present for this problem, are statistics about the dataset calculated and reported? Have any relevant results from this calculation been discussed?_
-- _If a dataset is **not** present for this problem, has discussion been made about the input space or input data for your problem?_
-- _Are there any abnormalities or characteristics about the input space or dataset that need to be addressed? (categorical variables, missing values, outliers, etc.)_
+
+The original proposal contemplated to get the date from an open dataset called "EOD data for all Dow Jones stocks" in Kaggle, which contained the historical data for Dow Jones stocks, however for some reason this dataset is not longer available. Then the alternative and solution used in this project is to extract the data from the original source, which is an API provided by IEX Group Inc. (https://iextrading.com), it provides access to stock historical records to developers and engineers for free.
+
+The API provided by IEX (which documentation can be found at https://iextrading.com/developer/docs/#chart) allows to retrieve historical stock price information for a maximum of 5 years back to the current date.
+The API can provide historical records for several companies, but for this project only the records for the ones in the Dow Jones are retrieved. An important aspect to notice is that the market is closed on weekends and some defined holidays.
+
+The API retrieves the data in the in JSON format, which at the end contains records, where each record corresponds to the information of a trading day for a specific company, a company is identified by a ticker symbol (also known as stock symbol). For example to retrieve the historical stock prices for the ticker symbol MSFT (Microsoft Corporation) of the last 5 years, the call to the API would be https://api.iextrading.com/1.0/stock/aapl/chart/5y
+
+The historic stock price records contain the following columns:
+
+* `date`: Trading day
+* `open`: Opening price
+* `high`: Highest price
+* `low`: Lower price
+* `close`: Closing price
+* `volume`: Number of shares traded
+* `unadjustedVolume`: Number of shares traded also considering companies adjustments
+* `change`: Change of closing price relative to the day before
+* `changePercent`: Change in percent value
+* `vwap`: Volume Weighted Average Price
+* `label`: Formatted version of the date
+* `changeOverTime`: Metric considered to measure the changes bases on weighted dates
+
+The following is a fragment of how the historical stock looks for the thicker symbol APPL (Apple Inc.):
+
+| date       | open    | high    | low     | close   | volume   | change    | changePercent | vwap    |
+|------------|---------|---------|---------|---------|----------|-----------|---------------|---------|
+| 2014-02-21 | 69.9727 | 70.2061 | 68.8967 | 68.9821 | 69757247 | -0.774858 |        -1.111 | 69.4256 |
+| 2014-02-24 | 68.7063 | 69.5954 | 68.6104 | 69.2841 | 72364950 |  0.302061 |         0.438 | 69.1567 |
+| 2014-02-25 | 69.5245 | 69.5488 | 68.4239 | 68.5631 | 58247350 | -0.72101  |        -1.041 | 68.9153 |
+| 2014-02-26 | 68.7667 | 68.9492 | 67.7147 | 67.9446 | 69131286 | -0.618575 |        -0.902 | 68.1373 |
+| 2014-02-27 | 67.917  | 69.4457 | 67.7738 | 69.2999 | 75557321 |  1.3553   |         1.995 | 68.8615 |
+| 2014-02-28 | 69.4851 | 69.9671 | 68.571  | 69.1121 | 93074653 | -0.187807 |        -0.271 | 69.2731 |
+| 2014-03-03 | 68.7417 | 69.6913 | 68.6616 | 69.3117 | 59667923 |  0.199626 |         0.289 | 69.1371 |
+
+
+The purpose of this project is to predict the future values of the closing price, which corresponds to the column `close`. From the set of columns is necessary to chose a subset which values can be known a priory and used for the prediction, unfortunately all the column values except date and label (which finally is a variant of the date) are unknown before the respective trading day ends. Then the only data that can be used to predict the future closing prices is the past closing prices and the company itself.
+
 
 ### Exploratory Visualization
-In this section, you will need to provide some form of visualization that summarizes or extracts a relevant characteristic or feature about the data. The visualization should adequately support the data being used. Discuss why this visualization was chosen and how it is relevant. Questions to ask yourself when writing this section:
-- _Have you visualized a relevant characteristic or feature about the dataset or input data?_
-- _Is the visualization thoroughly analyzed and discussed?_
-- _If a plot is provided, are the axes, title, and datum clearly defined?_
+
+Figure 1 presents a visualization of the historical closing prices for the 30 stocks of the companies in the Dow Jones, displaying the five years prior to March 23rd, 2019. The top image displays the prices along the time for all the companies, the bottom image is a comparison with the actual Dow Jones Industrial Average index (highlighted in black).
+
+![Dow Jones 5 year historic prices][DowJonesHistoric]
+
+The visualization in figure 2 displays the historical prices of the companies, but this time grouped by industry type, they are also contrasted with the Dow Jones Industrial Average index (identified with the symbol DIA).
+
+![Dow Jones 5 year historic prices per industry][DowJonesHistoricPerIndustry]
+
+The Dow Jones Industrial Average is calculated with the stock prices of 30 selected public large companies, then it is not surprising that most of these stocks are behaving in a similar way to the DJIA. To calculate the DJIA, the prices are added and then divided by the Dow divisor, which is constantly modified.
+
+Looking at the stocks one at a time, it looks like the stock prices fluctuates a lot and a clear pattern is not perceived, at least not at human comprehensible level, however several theories have been developed. This is understandable since the stock prices depend on a lot of different factors among them the company's financial health, economic supply-demand and even involving human emotions like trust, euphoria or panic.
+
+At a macro level it can be observed that they are common events that seem to affect the stock prices as a whole, like a rise and sudden fall around the beginning of 2018, or a drop at the end of 2018. However these kind of events also do not seem to have a comprehensible pattern.
+
+![1st Principal Component Analysis][PCA1]
+
+![2nd Principal Component Analysis][PCA2]
+
 
 ### Algorithms and Techniques
+
 In this section, you will need to discuss the algorithms and techniques you intend to use for solving the problem. You should justify the use of each one based on the characteristics of the problem and the problem domain. Questions to ask yourself when writing this section:
 - _Are the algorithms you will use, including any default variables/parameters in the project clearly defined?_
 - _Are the techniques to be used thoroughly discussed and justified?_
@@ -157,3 +205,13 @@ In this section, you will need to provide discussion as to how one aspect of the
 - Are all the resources used for this project correctly cited and referenced?
 - Is the code that implements your solution easily readable and properly commented?
 - Does the code execute without error and produce results similar to those reported?
+
+
+# VI. References
+
+[//]: # (Image References)
+
+[DowJonesHistoric]: ../figures/historic_djia.png
+[DowJonesHistoricPerIndustry]: ../figures/historic_djia_per_industry.png
+[PCA1]: ../figures/pca_01.png
+[PCA2]: ../figures/pca_02.png
