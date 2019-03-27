@@ -41,9 +41,9 @@ To address the problem a supervised learning approach is taken, the strategy to 
 
 The different machine learning methods used in this project take historical stock data for a particular company over a certain date range (in the past) as training input, and outputs projected estimates for a given queried date range (in the future). The following ones are the methods taken in this project to address the problem of making predictions about how the closing stock prices will perform:
 
-* ARIMA (autoregressive integrated moving average): It is a very popular statistical method for time series forecasting that takes into account the past values to predict the future values. [@stock_price_arima]
+* ARIMA (AutoRegressive Integrated Moving Average): It is a very popular statistical method for time series forecasting that takes into account the past values to predict the future values. [@stock_price_arima]
 * Prophet: It is a time series forecasting library designed and pioneered by Facebook, that is claimed to be extremely simple to implement. [@prophet_facebook] [@prophet_mongolian_stocks]
-* LSTM (Long Short Term Memory): It is a deep learning approach based in Recurrent Neural Networks (RNN) also used to make predictions in time series. [@stock_price_lstm_proc] [@stock_price_lstm]
+* LSTM (Long Short-Term Memory): It is a deep learning approach based in Recurrent Neural Networks (RNN) also used to make predictions in time series. [@stock_price_lstm_proc] [@stock_price_lstm]
 
 
 ### Metrics
@@ -96,36 +96,56 @@ The following is a fragment of how the historical stock looks for the thicker sy
 | 2014-03-03 | 68.7417 | 69.6913 | 68.6616 | 69.3117 | 59667923 |  0.199626 |         0.289 | 69.1371 |
 
 
-The purpose of this project is to predict the future values of the closing price, which corresponds to the column `close`. From the set of columns is necessary to chose a subset which values can be known a priory and used for the prediction, unfortunately all the column values except date and label (which finally is a variant of the date) are unknown before the respective trading day ends. Then the only data that can be used to predict the future closing prices is the past closing prices and the company itself.
+The purpose of this project is to predict the future values of the closing price, which corresponds to the column `close`. To make predictions is necessary to chose a subset of columns which values can be known a priory and used for the prediction, unfortunately all the column values except date and label (which finally is a variant of the date) are unknown before the occurrence of the respective trading days. Then, the only data that can be used to predict the future closing prices is the past closing prices and the company itself.
 
 
 ### Exploratory Visualization
 
-Figure 1 presents a visualization of the historical closing prices for the 30 stocks of the companies in the Dow Jones, displaying the five years prior to March 23rd, 2019. The top image displays the prices along the time for all the companies, the bottom image is a comparison with the actual Dow Jones Industrial Average index (highlighted in black).
+In figure \ref{DowJonesHistoricFig} it is presented a visualization of the historical closing prices for the 30 stocks of the companies in the Dow Jones, displaying the five years prior to March 23rd, 2019. The top image displays the prices along the time for all the companies, the bottom image is a comparison with the actual Dow Jones Industrial Average index (highlighted in black).
 
-![Dow Jones 5 year historic prices][DowJonesHistoric]
+![Dow Jones 5 year historic prices \label{DowJonesHistoricFig}][DowJonesHistoric]
 
-The visualization in figure 2 displays the historical prices of the companies, but this time grouped by industry type, they are also contrasted with the Dow Jones Industrial Average index (identified with the symbol DIA).
+The visualization in figure \ref{DowJonesHistoricPerIndustry} displays the historical prices of the companies, but this time grouped by industry type, they are also contrasted with the Dow Jones Industrial Average index (identified with the symbol DIA and plotted in a dotted black line).
 
-![Dow Jones 5 year historic prices per industry][DowJonesHistoricPerIndustry]
+![Dow Jones 5 year historic prices per industry \label{DowJonesHistoricPerIndustry}][DowJonesHistoricPerIndustry]
 
 The Dow Jones Industrial Average is calculated with the stock prices of 30 selected public large companies, then it is not surprising that most of these stocks are behaving in a similar way to the DJIA. To calculate the DJIA, the prices are added and then divided by the Dow divisor, which is constantly modified.
 
 Looking at the stocks one at a time, it looks like the stock prices fluctuates a lot and a clear pattern is not perceived, at least not at human comprehensible level, however several theories have been developed. This is understandable since the stock prices depend on a lot of different factors among them the company's financial health, economic supply-demand and even involving human emotions like trust, euphoria or panic.
 
-At a macro level it can be observed that they are common events that seem to affect the stock prices as a whole, like a rise and sudden fall around the beginning of 2018, or a drop at the end of 2018. However these kind of events also do not seem to have a comprehensible pattern.
-
-![1st Principal Component Analysis][PCA1]
-
-![2nd Principal Component Analysis][PCA2]
+At a macro level it can be observed that they are common events that seem to affect the stock prices as a whole, like a rise and sudden fall of prices around the beginning of 2018, or a drop of prices at the end of 2018. However these kind of events also do not seem to have a comprehensible pattern.
 
 
 ### Algorithms and Techniques
 
-In this section, you will need to discuss the algorithms and techniques you intend to use for solving the problem. You should justify the use of each one based on the characteristics of the problem and the problem domain. Questions to ask yourself when writing this section:
-- _Are the algorithms you will use, including any default variables/parameters in the project clearly defined?_
-- _Are the techniques to be used thoroughly discussed and justified?_
-- _Is it made clear how the input data or datasets will be handled by the algorithms and techniques chosen?_
+A normal machine learning dataset is a collection of observations where time does not necessarily play a main role, predictions are made for new/unknown data, that might be considered as predicting the future, however all the prior observations are pretty much treated equally, and the order or the observations is not taken in consideration, even is a good practice to shuffle the observations to perform the training.
+
+A time series dataset is different, because they have an explicit dependence of the order between observations, thus the time plays a main role. For these datasets the time is both a constraint and also a structure that provides additional information.
+
+During the exploration of the dataset it was realized that the only data that we can know a priory and use to make the predictions are the dates, then this characteristic makes the problem to forecast the stock closing prices to be a time series forecasting problem.
+
+There are some known methods to address the problem of forecasting time series, the ones that are going to be used for the implementation of this projects are described bellow.
+
+##### ARIMA (AutoRegressive Integrated Moving Average)
+
+It is a very popular statistical method for time series analysis and forecasting, its acronym is descriptive, capturing the key aspects of the model itself [@arima_python]:
+
+  * AR (Autoregression): A model that uses the dependent relationship between an observation and some number of lagged observations.
+  * I (Integrated). The use of differencing of raw observations (e.g. subtracting an observation from an observation at the previous time step) in order to make the time series stationary.
+  * MA (Moving Average): A model that uses the dependency between an observation and a residual error from a moving average model applied to lagged observations.
+
+
+##### Prophet
+
+It is an open source forecasting tool developed by Facebook, it is optimized for the business forecast tasks encountered at Facebook. They claim that the default settings produce forecasts that are often accurate as those produced by skilled forecasters, with much less effort. [@prophet_facebook]
+
+
+##### LSTM (Long Short-Term Memory):
+
+A Recurrent Neural Network (RNN) can be thought of as multiple copies of the same network, each passing a message to a successor, aiming for them to learn from the past [@undestanding_ltsm]. RNNs are good in handling sequential data but they have two main problems, the first one called "Vanishing/Exploding Gradient problem" presented since weights are repeated several times, and the second one called "Long-Term Dependencies problem" that happens when the context is far away [@lstm_scratch].
+
+Long Short-Term Memory networks are special kind of RNNs (introduced by Hochreiter & Schmidhuber in 1997 [@lstm]) with capability of handling Long-Term dependencies and also provide a solution to the Vanishing/Exploding Gradient problem [@lstm_scratch]. They are currently used to address difficult sequence problems in machine learning and achieve state-of-the-art results [@ltsm_python_keras].
+
 
 ### Benchmark
 In this section, you will need to provide a clearly defined benchmark result or threshold for comparing across performances obtained by your solution. The reasoning behind the benchmark (in the case where it is not an established result) should be discussed. Questions to ask yourself when writing this section:
@@ -141,6 +161,11 @@ In this section, all of your preprocessing steps will need to be clearly documen
 - _If the algorithms chosen require preprocessing steps like feature selection or feature transformations, have they been properly documented?_
 - _Based on the **Data Exploration** section, if there were abnormalities or characteristics that needed to be addressed, have they been properly corrected?_
 - _If no preprocessing is needed, has it been made clear why?_
+
+![1st Principal Component Analysis][PCA1]
+
+![2nd Principal Component Analysis][PCA2]
+
 
 ### Implementation
 In this section, the process for which metrics, algorithms, and techniques that you implemented for the given data will need to be clearly documented. It should be abundantly clear how the implementation was carried out, and discussion should be made regarding any complications that occurred during this process. Questions to ask yourself when writing this section:
@@ -211,7 +236,7 @@ In this section, you will need to provide discussion as to how one aspect of the
 
 [//]: # (Image References)
 
-[DowJonesHistoric]: ../figures/historic_djia.png
-[DowJonesHistoricPerIndustry]: ../figures/historic_djia_per_industry.png
-[PCA1]: ../figures/pca_01.png
-[PCA2]: ../figures/pca_02.png
+[DowJonesHistoric]: figs/historic_djia.png
+[DowJonesHistoricPerIndustry]: figs/historic_djia_per_industry.png
+[PCA1]: figs/pca_01.png
+[PCA2]: figs/pca_02.png
