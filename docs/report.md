@@ -126,7 +126,7 @@ During the exploration of the dataset it was realized that the only data that we
 
 There are some known methods to address the problem of forecasting time series, the ones that are going to be used for the implementation of this projects are described bellow.
 
-##### ARIMA (AutoRegressive Integrated Moving Average)
+#### 1. ARIMA (AutoRegressive Integrated Moving Average)
 
 It is a very popular statistical method for time series analysis and forecasting, its acronym is descriptive, capturing the key aspects of the model itself [@arima_python]:
 
@@ -135,22 +135,24 @@ It is a very popular statistical method for time series analysis and forecasting
   * MA (Moving Average): A model that uses the dependency between an observation and a residual error from a moving average model applied to lagged observations.
 
 
-##### Prophet
+#### 2. Prophet
 
 It is an open source forecasting tool developed by Facebook, it is optimized for the business forecast tasks encountered at Facebook. They claim that the default settings produce forecasts that are often accurate as those produced by skilled forecasters, with much less effort. [@prophet_facebook]
 
 
-##### LSTM (Long Short-Term Memory):
+#### 3. LSTM (Long Short-Term Memory):
 
-A Recurrent Neural Network (RNN) can be thought of as multiple copies of the same network, each passing a message to a successor, aiming for them to learn from the past [@undestanding_ltsm]. RNNs are good in handling sequential data but they have two main problems, the first one called "Vanishing/Exploding Gradient problem" presented since weights are repeated several times, and the second one called "Long-Term Dependencies problem" that happens when the context is far away [@lstm_scratch].
+A Recurrent Neural Network (RNN) can be thought of as multiple copies of the same network, each passing a message to a successor, aiming for them to learn from the past [@undestanding_ltsm]. RNNs are good in handling sequential data but they have two main problems, the first one called "Vanishing/Exploding Gradient problem" presented as a result of the weights being repeated several times, and the second one called "Long-Term Dependencies problem" that happens when the context is far away [@lstm_scratch].
 
 Long Short-Term Memory networks are special kind of RNNs (introduced by Hochreiter & Schmidhuber in 1997 [@lstm]) with capability of handling Long-Term dependencies and also provide a solution to the Vanishing/Exploding Gradient problem [@lstm_scratch]. They are currently used to address difficult sequence problems in machine learning and achieve state-of-the-art results [@ltsm_python_keras].
 
 
 ### Benchmark
-In this section, you will need to provide a clearly defined benchmark result or threshold for comparing across performances obtained by your solution. The reasoning behind the benchmark (in the case where it is not an established result) should be discussed. Questions to ask yourself when writing this section:
-- _Has some result or value been provided that acts as a benchmark for measuring performance?_
-- _Is it clear how this result or value was obtained (whether by data or by hypothesis)?_
+
+To test the prediction's accuracy/performance for the machine learning methods used in this project, a couple of historical tests datasets for a ticker symbol are taken up to a given date and used to perform the training. Then the prediction is performed and benchmarked over validation sets for the following 1, 5, 10, 20, 40, 60 and 120 trading days, which is almost equal to predict for the next trading day and then 1, 2, 4, 8, 12 and 24 weeks, however there can be holidays in between.
+
+To benchmark the performance of the different machine learning methods implemented in this project, they are compared against an initial naive solution which is produced via linear regression, where the predictor is the trading days' date (or a decomposition of it in day, month, year, week of year, day of week and day of year), and the predicted value the closing price.
+A result of the benchmarking can be expressed in terms of percentage of improving (or worsening) against the linear regression.
 
 
 ## III. Methodology
