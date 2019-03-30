@@ -105,11 +105,15 @@ In figure \ref{DowJonesHistoricFig} it is presented a visualization of the histo
 
 ![Dow Jones 5 year historic prices \label{DowJonesHistoricFig}][DowJonesHistoric]
 
-The visualization in figure \ref{DowJonesHistoricPerIndustry} displays the historical prices of the companies, but this time grouped by industry type, they are also contrasted with the Dow Jones Industrial Average index (identified with the symbol DIA and plotted in a dotted black line).
+The visualization in figure \ref{DowJonesHistoricPerIndustry} displays the historical prices of the stocks, but this time grouped by industry type, they are also contrasted with the Dow Jones Industrial Average index (identified with the symbol DIA and plotted in a dotted black line).
 
 ![Dow Jones 5 year historic prices per industry \label{DowJonesHistoricPerIndustry}][DowJonesHistoricPerIndustry]
 
 The Dow Jones Industrial Average is calculated with the stock prices of 30 selected public large companies, then it is not surprising that most of these stocks are behaving in a similar way to the DJIA. To calculate the DJIA, the prices are added and then divided by the Dow divisor, which is constantly modified.
+
+In figure \ref{DowJonesCorrelation} is presented a visualization that shows the correlation of each one of the stocks in the Dow Jones against each other and against the actual DJIA. It can be observed that in most of the cases there is a high correlation, observed by a dominance of the red color in the matrix (which is the color to indicate a high correlation, i.e. close to 1), only 4 companies seem no to follow the same tendency as the the general DJIA.
+
+![Correlation among Dow Jones stocks \label{DowJonesCorrelation}][DowJonesCorrelation]
 
 Looking at the stocks one at a time, it looks like the stock prices fluctuates a lot and a clear pattern is not perceived, at least not at human comprehensible level, however several theories have been developed. This is understandable since the stock prices depend on a lot of different factors among them the company's financial health, economic supply-demand and even involving human emotions like trust, euphoria or panic.
 
@@ -126,7 +130,13 @@ During the exploration of the dataset it was realized that the only data that we
 
 There are some known methods to address the problem of forecasting time series, the ones that are going to be used for the implementation of this projects are described bellow.
 
-#### 1. ARIMA (AutoRegressive Integrated Moving Average)
+#### 1. Linear Regression
+
+Linear regression is the first and naive Machine Learning method to implement, the idea is just to obtain the regression line for the closing prices against the dates, this is the one that is going to be used to benchmark the other methods during the evaluation.
+
+A variant of linear regression is also going to be explored for this project, the idea is that that the date components: year, month, day, week, day-of-week and day-of-year, might play a role in the determination of the closing price of a stock, then linear regression is applied using these components as predictors.
+
+#### 2. ARIMA (AutoRegressive Integrated Moving Average)
 
 It is a very popular statistical method for time series analysis and forecasting, its acronym is descriptive, capturing the key aspects of the model itself [@arima_python]:
 
@@ -135,16 +145,16 @@ It is a very popular statistical method for time series analysis and forecasting
   * MA (Moving Average): A model that uses the dependency between an observation and a residual error from a moving average model applied to lagged observations.
 
 
-#### 2. Prophet
+#### 3. Prophet
 
 It is an open source forecasting tool developed by Facebook, it is optimized for the business forecast tasks encountered at Facebook. They claim that the default settings produce forecasts that are often accurate as those produced by skilled forecasters, with much less effort. [@prophet_facebook]
 
 
-#### 3. LSTM (Long Short-Term Memory):
+#### 4. LSTM (Long Short-Term Memory):
 
 A Recurrent Neural Network (RNN) can be thought of as multiple copies of the same network, each passing a message to a successor, aiming for them to learn from the past [@undestanding_ltsm]. RNNs are good in handling sequential data but they have two main problems, the first one called "Vanishing/Exploding Gradient problem" presented as a result of the weights being repeated several times, and the second one called "Long-Term Dependencies problem" that happens when the context is far away [@lstm_scratch].
 
-Long Short-Term Memory networks are special kind of RNNs (introduced by Hochreiter & Schmidhuber in 1997 [@lstm]) with capability of handling Long-Term dependencies and also provide a solution to the Vanishing/Exploding Gradient problem [@lstm_scratch]. They are currently used to address difficult sequence problems in machine learning and achieve state-of-the-art results [@ltsm_python_keras].
+Long Short-Term Memory networks are a special kind of RNNs (introduced by Hochreiter & Schmidhuber in 1997 [@lstm]) with capability of handling Long-Term dependencies and also provide a solution to the Vanishing/Exploding Gradient problem [@lstm_scratch]. They are currently used to address difficult sequence problems in machine learning and achieve state-of-the-art results [@ltsm_python_keras].
 
 
 ### Benchmark
@@ -156,17 +166,23 @@ A result of the benchmarking can be expressed in terms of percentage of improvin
 
 
 ## III. Methodology
-_(approx. 3-5 pages)_
 
 ### Data Preprocessing
-In this section, all of your preprocessing steps will need to be clearly documented, if any were necessary. From the previous section, any of the abnormalities or characteristics that you identified about the dataset will be addressed and corrected here. Questions to ask yourself when writing this section:
-- _If the algorithms chosen require preprocessing steps like feature selection or feature transformations, have they been properly documented?_
-- _Based on the **Data Exploration** section, if there were abnormalities or characteristics that needed to be addressed, have they been properly corrected?_
-- _If no preprocessing is needed, has it been made clear why?_
 
-![1st Principal Component Analysis][PCA1]
+For this projects different ML methods/models are used, and the requirements for the inputs they receive are diverse, of course for all of them the outcome is the same, i.e. the closing price of the stock. It is also important to notice that all the methods performs the forecast for just one ticker symbol, then a common step is to filter the data set to get the records for the related ticker symbol (since the dataset contains the records for all the ticker symbols in the Dow Jones).
 
-![2nd Principal Component Analysis][PCA2]
+Each one of the methods/model addressed in this project requires its particular way to preprocess the data that is used in the training set, those are described bellow:
+
+
+* Linear regression: The training set requires as a numeric representation of the date as a predictor (because dates are not supported), the preprocessing to prepare the training set consists in selecting just the `date` and `close` columns, then for the date its timestamp is calculated and using this value as a predictor instead of the actual date. The model is trained by using the timestamp as a predictor and the closing price as the outcome's ground truth.
+
+* Linear regression using date components: In this approach also to prepare the training `date` and `close` columns are selected, then for the date the components: year, month, day, week, day-of-week and day-of-year are calculated. The model is trained by using the these components as predictors, they are numerical values so the linear regression can support them, the closing price is used as the outcome's ground truth.
+
+* ARIMA: This model only needs a sequence of ground truth consecutive values in the time series to do the training, then to prepare the training set only the column `close` needs to be selected, however an important aspect is that the order must be preserved.
+
+* Prophet: This models receives the date as predictor and the ground truth of the value to predict as outcome, however their columns should be named `ds` and `y` respectively. Then to prepare the training set for this model, the `date` and `close` columns are selected and then renamed.
+
+* LSTM: The preprocessing mechanism for this model is the most complex of all, because LSTM takes as predictors sequences of a given length (known as time-steps) containing consecutive values in a time series and the outcome is the next value in the time sequence, i.e. the predictor is a subsequence of the time series instead of a single value. To prepare the training set only the values in the column `close` are needed, the date is not necessary since the important factor is the order, however the preprocessing for this method consists in creating the subsequences with the closing prices previous to the date of the respective outcome. Also as in most deep-learning approaches it's recommended that the values (to predict in this case) are normalized, then for this project the closing prices are scaled to the range from 0 to 1.
 
 
 ### Implementation
@@ -240,5 +256,4 @@ In this section, you will need to provide discussion as to how one aspect of the
 
 [DowJonesHistoric]: figs/historic_djia.png
 [DowJonesHistoricPerIndustry]: figs/historic_djia_per_industry.png
-[PCA1]: figs/pca_01.png
-[PCA2]: figs/pca_02.png
+[DowJonesCorrelation]: figs/correlation_djia_stocks.png
