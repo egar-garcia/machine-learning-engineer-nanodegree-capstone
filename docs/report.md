@@ -2,7 +2,7 @@
 title: "Machine Learning Engineer Nanodegree"
 subtitle: "Capstone Project Report"
 author: Egar Garcia
-date: March 23rd, 2019
+date: March 31st, 2019
 geometry: margin=1in
 output: pdf_document
 bibliography: capstone_proposal.bib
@@ -171,25 +171,83 @@ A result of the benchmarking can be expressed in terms of percentage of improvin
 
 For this projects different ML methods/models are used, and the requirements for the inputs they receive are diverse, of course for all of them the outcome is the same, i.e. the closing price of the stock. It is also important to notice that all the methods performs the forecast for just one ticker symbol, then a common step is to filter the data set to get the records for the related ticker symbol (since the dataset contains the records for all the ticker symbols in the Dow Jones).
 
-Each one of the methods/model addressed in this project requires its particular way to preprocess the data that is used in the training set, those are described bellow:
+Each one of the methods/models addressed in this project requires its particular way to preprocess the data that is used in the training set, those are described bellow:
 
 
-* Linear regression: The training set requires as a numeric representation of the date as a predictor (because dates are not supported), the preprocessing to prepare the training set consists in selecting just the `date` and `close` columns, then for the date its timestamp is calculated and using this value as a predictor instead of the actual date. The model is trained by using the timestamp as a predictor and the closing price as the outcome's ground truth.
+* Linear regression: The training set requires a numeric representation of the date as a predictor (because dates are not supported), the preprocessing to prepare the training set consists in selecting just the `date` and `close` columns, then for the date its timestamp is calculated and using this value as a predictor instead of the actual date. The model is trained by using the timestamp as a predictor and the closing price as the outcome's ground truth.
 
-* Linear regression using date components: In this approach also to prepare the training `date` and `close` columns are selected, then for the date the components: year, month, day, week, day-of-week and day-of-year are calculated. The model is trained by using the these components as predictors, they are numerical values so the linear regression can support them, the closing price is used as the outcome's ground truth.
+* Linear regression using date components: In this approach also to prepare the training set, the `date` and `close` columns are selected, then for the date the components: year, month, day, week, day-of-week and day-of-year are calculated. The model is trained by using the these components as predictors, they are numerical values so the linear regression can support them, the closing price is used as the outcome's ground truth.
 
 * ARIMA: This model only needs a sequence of ground truth consecutive values in the time series to do the training, then to prepare the training set only the column `close` needs to be selected, however an important aspect is that the order must be preserved.
 
-* Prophet: This models receives the date as predictor and the ground truth of the value to predict as outcome, however their columns should be named `ds` and `y` respectively. Then to prepare the training set for this model, the `date` and `close` columns are selected and then renamed.
+* Prophet: This model receives the date as predictor and the ground truth of the value to predict as outcome, however their columns should be named `ds` and `y` respectively. Then to prepare the training set for this model, the `date` and `close` columns are selected and then renamed.
 
 * LSTM: The preprocessing mechanism for this model is the most complex of all, because LSTM takes as predictors sequences of a given length (known as time-steps) containing consecutive values in a time series and the outcome is the next value in the time sequence, i.e. the predictor is a subsequence of the time series instead of a single value. To prepare the training set only the values in the column `close` are needed, the date is not necessary since the important factor is the order, however the preprocessing for this method consists in creating the subsequences with the closing prices previous to the date of the respective outcome. Also as in most deep-learning approaches it's recommended that the values (to predict in this case) are normalized, then for this project the closing prices are scaled to the range from 0 to 1.
 
+In terms of the prediction, the mechanism is to query by a date range, then the set of trading days in that range is calculated and gathered together in an array. Again, each particular of method/model requires its own way to preprocess the data to be able to perform the prediction, those are described bellow:
+
+
+* Linear regression: The model requires as a numeric representation of the date to perform the prediction, the preprocessing to prepare the data for prediction consists on transforming the array of trading days to a data-frame with only one column `date`, then transforming the column `date` to a timestamp, which is the predictor used during training.
+
+* Linear regression using date components: For this approach the preprocessing consist on transforming the array of trading days to a data-frame with only one column `date`, then the date is broken down in the components: year, month, day, week, day-of-week and day-of-year, which are the predictors used during training.
+
+* ARIMA: For this model only the number of future points to predict is required, then the preprocessing only consist on getting the size of the array containing the trading days to predict.
+
+* Prophet: Same as the previous one, this model only needs the number of future points to predict, then the preprocessing only consist on getting the size of the array containing the trading days to predict.
+
+* LSTM: The preprocessing mechanism for the prediction set for this model is also complex, because LSTM takes as predictors sequences of a given length containing consecutive values in a time series and the predicted value would be the  next value in the time sequence. The preparation/preprocessing of the prediction set consist in creating subsequences containing the closing prices previous to the date to predict, normalized to a range from 0 to 1, since these are the inputs that the LSTM network accept.
+
 
 ### Implementation
-In this section, the process for which metrics, algorithms, and techniques that you implemented for the given data will need to be clearly documented. It should be abundantly clear how the implementation was carried out, and discussion should be made regarding any complications that occurred during this process. Questions to ask yourself when writing this section:
-- _Is it made clear how the algorithms and techniques were implemented with the given datasets or input data?_
-- _Were there any complications with the original metrics or techniques that required changing prior to acquiring a solution?_
-- _Was there any part of the coding process (e.g., writing complicated functions) that should be documented?_
+
+The implementation process it is documented in more detail and can be followed at https://github.com/egar-garcia/machine-learning-engineer-nanodegree-capstone/blob/master/StockForecasting.ipynb. The implementation stages are described bellow.
+
+#### 1. Dataset management
+
+An object oriented approach has been taken to create a class called `Dataset` which objects are intended to be used to manage the dataset by performing the following operations:
+* Creating a new dataset by retrieving the data from the source (which is the API provided by IEX Group Inc.)
+* Updating the data by retrieving the most recent information from the source.
+* Loading and saving the data to files.
+* Filtering the data by date range or ticker symbols.
+
+Another class called `TradingDaysHelper` is created with the purpose of getting the existing trading days (the days that the stock market is open) in a date range, or to get a determined number of trading days after a given date (this is useful to perform validations for a number of days ahead). The market is closed on weekend and some holidays that can be loaded from a file (by default named `market_holidays.txt`). The use of objets of this class is very important since not all the dates in a date range are predictable, just the ones when the market is open.
+
+#### 2. Data exploration and visualization
+
+In this phase were created the code in Python to generate the visualizations presented previously in the "Exploratory Visualization" section of this report. These visualizations aimed to plot the historical closing prices of the stocks, compare them with the actual Dow Jones Industrial Index and retrieve the correlation among the related companies' stocks.
+
+Also a purpose was trying to identify patterns that could help to select some machine learning methods or to do some treatment to the data. However not evident (at least by humans) patterns were observed, which lead to reinforce the decision of using techniques to forecast time series.
+
+#### 3. Implementation of the machine learning methods/Models
+
+Again an object oriented approach was taken to represent each one of the machine learning methods/models as an object. A super class called `StockForecasterModel` represents a generic ML model which provides methods to do the training and perform predictions, as well as load or save the object (model) to a file.
+
+An object/model is restricted to perform predictions for only one ticker symbol, this is because a time series only makes sense for the historical records of one particular ticker symbol.
+
+To perform the training, a dataset is provided to get the historical records of the ticker symbol, and optionally a date range (given by a start and end date) can be provided to only consider the records that fall in that range for the training.
+
+To do predictions a date range is given, then the purpose is to predict the closing prices in the trading days that exist in that range. The result is retrieved as a data-frame that contains the date of the trading days in the range with their respective predicted closing price.
+
+For each-one of the methods/models implemented in this project a specific class created to do the specifics for method, like preprocessing/preparation of the data used for training and prediction, instantiation and fitting of the underlaying models, preparation of the results, etc. The models implemented for this project, their classes and underlying modules are listed bellow:
+
+* **Linear Regression** implemented in the class  `LinearRegressionStockForecaster`, uses the underlying module `sklearn.linear_model.LinearRegression`.
+* **Linear regression using date components** implemented in the class which name is  `DateComponentsLinearRegressionStockForecaster`, as the Linear regression it also uses the underlying module `sklearn.linear_model.LinearRegression`.
+* **ARIMA** implemented in the class called `ArimaStockForecaster`, uses the underlying module `pyramid.arima.auto_arima`.
+* **Prophet** implemented in the class called `ProphetStockForecaster`, uses the underlying module `fbprophet.Prophet`.
+* **Long Short-Term Memory** implemented in the class called `LongShortTermMemoryStockForecaster`, uses the underlying module `keras.layers.LSTM`.
+
+#### 4. Evaluation of the Models
+
+In this phase was created the function to do the calculation of the evaluation metric which is RMSE (Root Mean Square Error), which is applied to measure the error in the validation set of the predictions of the closing prices against the ground truth.
+
+Also in this phase was created the code in Python to generate and automate the evaluation of the performance of the different implemented ML models, selecting a ticker symbol a data range for training and number of further trading days to do the validation.
+
+The evaluation results comes as a data-frame, which indicates per each one of the models the RMSE of their predictions against the ground truth applied to validation set conformed of given numbers of trading days ahead. This is also accompanied with a plot displaying the predicted closing prices agains the real values, those evaluations are displayed in the Results section of this document.
+
+For this phase, it was also created the code to display the reports of the performance (based on RMSE) per model and the percentage of improvement against the Linear Regression (which is the benchmarking model).
+
+#### 5. Results
+
 
 ### Refinement
 In this section, you will need to discuss the process of improvement you made upon the algorithms and techniques you used in your implementation. For example, adjusting parameters for certain models to acquire improved solutions would fall under the refinement category. Your initial and final solutions should be reported, as well as any significant intermediate results as necessary. Questions to ask yourself when writing this section:
