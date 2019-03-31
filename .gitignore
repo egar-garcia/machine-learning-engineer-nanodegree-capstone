@@ -7,3 +7,4 @@
 # Python Compiled
 **/*.pyc
 
+evaluation/*.pkl
