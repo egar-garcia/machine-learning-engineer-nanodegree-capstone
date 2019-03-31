@@ -246,10 +246,18 @@ The evaluation results comes as a data-frame, which indicates per each one of th
 
 For this phase, it was also created the code to display the reports of the performance (based on RMSE) per model and the percentage of improvement against the Linear Regression (which is the benchmarking model).
 
-#### 5. Results
-
 
 ### Refinement
+
+The first aspect that was refined during the implementation was related with the mechanism for getting the dataset, IEX API only allows to get records for the previous 5 years, however the dataset management does not have to be limited by this constraint since an old dataset can be updated just by adding the missing records, and in this way having a mechanism for storing more data and keeping the dataset updated.
+
+Another refined aspect was related to the prediction using linear regression, the idea was do do a variation of it to instead consider as predictors the date components (day, month, year, week, day-of-week and day-of-year) wondering if they play a role in determining the closing price of the stocks, however as it will be shown in the results sections the outcomes are not really consistent.
+
+In the case of Prophet, there was just a small improvement to be out of the default values by turning on the flag `daily_seasonality` when fitting the model, matching the way that the closing stock prices are predicted, i.e. in a daily like way. This in general produced better results for the predictions.
+
+The biggest refinement was done for LSTM.
+
+
 In this section, you will need to discuss the process of improvement you made upon the algorithms and techniques you used in your implementation. For example, adjusting parameters for certain models to acquire improved solutions would fall under the refinement category. Your initial and final solutions should be reported, as well as any significant intermediate results as necessary. Questions to ask yourself when writing this section:
 - _Has an initial solution been found and clearly reported?_
 - _Is the process of improvement clearly documented, such as what techniques were used?_
