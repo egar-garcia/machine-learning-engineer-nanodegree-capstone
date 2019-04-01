@@ -2,7 +2,7 @@
 <html>
 <head><meta charset="utf-8" />
 
-<title>StockForecasting</title>
+<title>StockPricePredictor-Project-Development</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
@@ -14927,7 +14927,7 @@ To register the converters:
                         <span class="s1">&#39;RMSE&#39;</span><span class="p">:</span> <span class="n">rmse</span><span class="p">(</span><span class="n">preds</span><span class="o">.</span><span class="n">predicted_price</span><span class="o">.</span><span class="n">values</span><span class="p">[:</span><span class="n">v</span><span class="p">],</span>
                                      <span class="n">validation_dataset</span><span class="o">.</span><span class="n">dataframe</span><span class="o">.</span><span class="n">close</span><span class="o">.</span><span class="n">values</span><span class="p">[:</span><span class="n">v</span><span class="p">])})</span>
 
-    <span class="c1"># Ploting the graph to compare the predicted closing prices agaings the ones in the validation set</span>
+    <span class="c1"># Ploting the graph to compare the predicted closing prices against the ones in the validation set</span>
     <span class="n">subplot</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">training_dataset</span><span class="o">.</span><span class="n">dataframe</span><span class="o">.</span><span class="n">date</span><span class="p">,</span> <span class="n">training_dataset</span><span class="o">.</span><span class="n">dataframe</span><span class="o">.</span><span class="n">close</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Training&#39;</span><span class="p">)</span>
     <span class="n">subplot</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">validation_dataset</span><span class="o">.</span><span class="n">dataframe</span><span class="o">.</span><span class="n">date</span><span class="p">,</span> <span class="n">validation_dataset</span><span class="o">.</span><span class="n">dataframe</span><span class="o">.</span><span class="n">close</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Validation&#39;</span><span class="p">)</span>
     <span class="n">subplot</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">preds</span><span class="o">.</span><span class="n">date</span><span class="p">,</span> <span class="n">preds</span><span class="o">.</span><span class="n">predicted_price</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Prediction&#39;</span><span class="p">)</span>
@@ -15104,6 +15104,11 @@ To register the converters:
 <span class="sd">    in regards to the percentage of improvement against the benchmarking model,</span>
 <span class="sd">    highlighting the results of the models that achieve the best results</span>
 <span class="sd">    (i.e. higher percentage) per number of validation days.</span>
+
+<span class="sd">    Note: An improvement of 100% means that there was no error in the prediction,</span>
+<span class="sd">    an improvement of 0% means that it behaves the same as the linear regression,</span>
+<span class="sd">    and a negative improvement means that the error (RMSE) was bigger than </span>
+<span class="sd">    using linear regression.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">linear_regression_results</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s2">&quot;method == &#39;Linear Regression&#39;&quot;</span><span class="p">)</span>\
@@ -16328,7 +16333,7 @@ Epoch 2/2
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Let's get an array of ticker symbols, execpt 'DWDP', because it doesn't have enough historical records to do an evaluation with 750 (around 3 years) back.</p>
+<p>For the <strong>Official Evaluation</strong>, let's get an array of ticker symbols in the Dow Jones, execept 'DWDP', because it doesn't have enough historical records to do an evaluation with 750 (around 3 years) back.</p>
 
 </div>
 </div>
@@ -16788,12 +16793,85 @@ Epoch 2/2
 </div>
 
 </div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<hr>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Conclusion">Conclusion<a class="anchor-link" href="#Conclusion">&#182;</a></h2><p>During the work done for this project two different prediction problems have been found:</p>
+<ol>
+<li><p><strong>Predicting the closing prices for a date range in the future</strong>. In here the future data is completely unknown and the model would be used to forecast the closing prices or at least to describe a tendency. This is an extremely difficult problem and it seems that the models studied in this project are not able to do predictions with a lot of accuracy, however by the evaluation results looks like Arima, Prophet and LSTM perform similarly and at least can give a tendency in short term even significant up to 40 or 60 trading days (8 or 12 weeks) in the future.</p>
+</li>
+<li><p><strong>Predicting the closing price for the next day</strong>. Assuming that the dataset is periodically (ideally every day) updated and the problem is to predict the closing price for the next day. For this problem LSTM definitively excels, it reports consistently row RMSEs even for 120 trading days (24 weeks) in the future after training.</p>
+</li>
+</ol>
+<p>At the end the purpose of the project is to give options to the customer to address those two described problems or something in between, for that reason rater than selecting only one model as a solution, the solution is to provide the user the option or using some of the models studied in this project.</p>
+<p>The the final solution is to provide the user the option of using the following models to do predictions for the stock closing prices:</p>
+<ul>
+<li>Linear Regression (since is very well known)</li>
+<li>ARIMA</li>
+<li>Prophet</li>
+<li>LSTM</li>
+</ul>
+<p>The final solution is enclosed in the form of a Python file <code>djia_stock_prediction.py</code> which contains the constructions developed in here to manage the datase and creating and thaining the models listed above. This solution is recomended to be used through a Jupyter notebook since it provides a friendly enviroment where the user can perform experiments an visualizations.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<hr>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[56]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="o">!!</span>jupyter nbconvert StockPricePredictor-Project-Development.ipynb
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[56]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>[&#39;[NbConvertApp] Converting notebook StockPricePredictor-Project-Development.ipynb to html&#39;,
+ &#39;[NbConvertApp] Writing 3292689 bytes to StockPricePredictor-Project-Development.html&#39;]</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 <div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="o">!!</span>jupyter nbconvert *.ipynb
+<div class=" highlight hl-ipython3"><pre><span></span> 
 </pre></div>
 
     </div>

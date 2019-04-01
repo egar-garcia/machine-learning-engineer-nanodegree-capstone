@@ -7,4 +7,6 @@
 # Python Compiled
 **/*.pyc
 
+data/djia_prod.pkl
 evaluation/*.pkl
+models/*
