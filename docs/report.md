@@ -255,30 +255,72 @@ Another refined aspect was related to the prediction using linear regression, th
 
 In the case of Prophet, there was just a small improvement to be out of the default values by turning on the flag `daily_seasonality` when fitting the model, matching the way that the closing stock prices are predicted, i.e. in a daily like way. This in general produced better results for the predictions.
 
-The biggest refinement was done for LSTM.
+The biggest refinement was done for LSTM. In articles like [@stock_prices_prediction] the predicted closing prices seem to be "spectacular", however to do the prediction they use the validation set, which at the beginning seems to be like cheating, however in a second look it is actually a different approach to for the prediction mechanism. In all the other methods it is assumed that the known records are used in the training set, then the closing prices of dates to predict are completely unknown, and the model just tries to infer those values based on the training data.
 
+However, the full potential of LTSM is reached if the dataset is periodically updated (ideally every day), that can help the model to get better predictions for the days ahead, without the need of retraining the model. This mechanism is identified in this project as "Long Short Term Memory - daily prediction" and the way it works is by updating the model at the end of each day and then doing the prediction for the next day. In this way the new data also play a role for predicting the future data without training again the model. This is the mechanism in which can be reached the "spectacular" results mentioned above.
 
-In this section, you will need to discuss the process of improvement you made upon the algorithms and techniques you used in your implementation. For example, adjusting parameters for certain models to acquire improved solutions would fall under the refinement category. Your initial and final solutions should be reported, as well as any significant intermediate results as necessary. Questions to ask yourself when writing this section:
-- _Has an initial solution been found and clearly reported?_
-- _Is the process of improvement clearly documented, such as what techniques were used?_
-- _Are intermediate and final solutions clearly reported as the process is improved?_
+The refinement done for LTSM was the incorporation of those two options, 1) inferring future closing prices assuming they are unknown (or if the dataset has  not being updated), similarly to the other models and which might be useful for long term predictions, and 2) taking advance of the updated dataset to do the predictions for next or future days. Details of this implementation can be seen in the code of the function `predict` in the class `LongShortTermMemoryStockForecaster`.
 
 
 ## IV. Results
-_(approx. 2-3 pages)_
 
 ### Model Evaluation and Validation
-In this section, the final model and any supporting qualities should be evaluated in detail. It should be clear how the final model was derived and why this model was chosen. In addition, some type of analysis should be used to validate the robustness of this model and its solution, such as manipulating the input data or environment to see how the model’s solution is affected (this is called sensitivity analysis). Questions to ask yourself when writing this section:
-- _Is the final model reasonable and aligning with solution expectations? Are the final parameters of the model appropriate?_
-- _Has the final model been tested with various inputs to evaluate whether the model generalizes well to unseen data?_
-- _Is the model robust enough for the problem? Do small perturbations (changes) in training data or the input space greatly affect the results?_
-- _Can results found from the model be trusted?_
+
+Several examples of evaluations can be found at https://github.com/egar-garcia/machine-learning-engineer-nanodegree-capstone/blob/master/StockForecasting.ipynb where the models were evaluated for some ticker symbols and points in time. For purposes of space in this document only the official evaluation would be included.
+
+The official evaluation consist in randomly select a date range for training, it should contain 750 trading days (which is around 3 years of historical records) and old enough to leave at least 120 trading days in the dataset following the training end date to use for validation. Also it is selected a random ticker symbol in the Dow Jones, except 'DWDP', because it doesn't have enough historical records to do an evaluation with 750 trading days back.
+
+The models/methods to evaluate are listed bellow:
+
+* Linear Regression (the one used for benchmarking).
+* Linear Regression - Date Components (linear regression using day, month, year, week, day-of-week and day-of-year as predictors)
+* Arima
+* Prophet
+* Long Short Term Memory
+* Long Short Term Memory - daily prediction (LSTM simulating the daily update of the dataset and daily prediction for the next trading day)
+
+The RMSE is calculated agains the ground truth in the validation set for the following 1, 5, 10, 20, 40, 60 and 120 trading days after the training end date. The results are observed in figure \ref{random_eval_rmse}, the models that performed the best (with the minimum RMSE) are highlighted in yellow.
+
+![Evaluation results by RMSE \label{random_eval_rmse}][random_eval_rmse]
+
+In figure \ref{random_eval_plot} it can be visualized how the predictions performed for each one of the evaluated models/methods in comparison with the validation set which contains the ground truth.
+
+![Predictions against ground truth of evaluated models \label{random_eval_plot}][random_eval_plot]
+
+It's worth to mention that during the work done for this project two different prediction problems have been found:
+
+1. Predicting the closing prices for a date range in the future. In here the future data is completely unknown and the model would be used to forecast the closing prices or at least to describe a tendency. This is an extremely difficult problem and it seems that the models studied in this project are not able to do predictions with a lot of accuracy, however by the evaluation results looks like Arima, Prophet and LSTM perform similarly and at least can give a tendency in short term even significant up to 40 or 60 trading days (8 or 12 weeks) in the future.
+
+2. Predicting the closing price for the next day. Assuming that the dataset is periodically (ideally every day) updated and the problem is to predict the closing price for the next day. For this problem LSTM definitively excels, it reports consistently row RMSEs even for 120 trading days (24 weeks) in the future after training.
+
+At the end the purpose of the project is to give options to the customer to address those two described problems or something in between, for that reason rater than selecting only one model as a solution, the solution is to provide the user the option or using some of the models studied in this project.
+
 
 ### Justification
-In this section, your model’s final solution and its results should be compared to the benchmark you established earlier in the project using some type of statistical analysis. You should also justify whether these results and the solution are significant enough to have solved the problem posed in the project. Questions to ask yourself when writing this section:
-- _Are the final results found stronger than the benchmark result reported earlier?_
-- _Have you thoroughly analyzed and discussed the final solution?_
-- _Is the final solution significant enough to have solved the problem?_
+
+To measure how the models improve (or worsen) against the benchmarking model which is the Linear Regression a ratio (expressed as percentage) of improvement is calculate with the following formula:
+$$ model\_improvement = (LinearRegression\_RMSE - Model\_RMSE) / LinearRegression\_RMSE $$
+
+Improvement rate can be interpreted as follows:
+* A value of 1 (100%) means that the model has no error, then it was improved to the perfection.
+* A value of 0 (0%) means that the model has the same performance than the linear regression, i.e. it was not improvement or worsening.
+* A positive value between 0 and 1 means that the model performs better than the liner regression, but still with some errors, the closer to 1 (100%) the smaller the errors in the predictions.
+* A negative value means that the performance of the model is worst than the linear regression.
+
+In figure \ref{random_eval_improvement} the rate/percentage of improvement against the benchmarking model (Linear Regression) is presented, this is organized per number of following trading days after the training end date, the methods that performed the best are highlighted in yellow.
+
+![Improvement in regards to Linear Regression of evaluated models \label{random_eval_improvement}][random_eval_improvement]
+
+From the results it can be justified that the method "Linear Regression - Date Components" to be ruled out since it does not really present an improvement, even in other evaluations included in the GitHub repository mentioned above even present inconsistencies.
+
+As stated in the bellow section the results shown that ARIMA, Prophet and LSTM present a similar performance behavior in short term and up to 40-60 trading days in the future. LSTM used to perform daily predictions in an updated dataset presents significant improvement even at 120 trading days ahead.
+
+The the final solution is to provide the user the option of using the following models to do predictions for the stock closing prices:
+
+* Linear Regression (since is very well known)
+* ARIMA
+* Prophet
+* LSTM
 
 
 ## V. Conclusion
@@ -323,3 +365,6 @@ In this section, you will need to provide discussion as to how one aspect of the
 [DowJonesHistoric]: figs/historic_djia.png
 [DowJonesHistoricPerIndustry]: figs/historic_djia_per_industry.png
 [DowJonesCorrelation]: figs/correlation_djia_stocks.png
+[random_eval_plot]: figs/random_eval.png
+[random_eval_rmse]: figs/random_eval_rmse.png
+[random_eval_improvement]: figs/random_eval_improvement.png
