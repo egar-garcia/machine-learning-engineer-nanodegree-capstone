@@ -200,7 +200,7 @@ In terms of the prediction, the mechanism is to query by a date range, then the 
 
 ### Implementation
 
-The implementation process it is documented in more detail and can be followed at https://github.com/egar-garcia/machine-learning-engineer-nanodegree-capstone/blob/master/StockForecasting.ipynb. The implementation stages are described bellow.
+The implementation process it is documented in more detail and can be followed at https://github.com/egar-garcia/machine-learning-engineer-nanodegree-capstone/blob/master/StockPricePredictor-Project-Development.ipynb. The implementation stages are described bellow.
 
 #### 1. Dataset management
 
@@ -266,7 +266,7 @@ The refinement done for LTSM was the incorporation of those two options, 1) infe
 
 ### Model Evaluation and Validation
 
-Several examples of evaluations can be found at https://github.com/egar-garcia/machine-learning-engineer-nanodegree-capstone/blob/master/StockForecasting.ipynb where the models were evaluated for some ticker symbols and points in time. For purposes of space in this document only the official evaluation would be included.
+Several examples of evaluations can be found at https://github.com/egar-garcia/machine-learning-engineer-nanodegree-capstone/blob/master/StockPricePredictor-Project-Development.ipynb where the models were evaluated for some ticker symbols and points in time. For purposes of space in this document only the official evaluation would be included.
 
 The official evaluation consist in randomly select a date range for training, it should contain 750 trading days (which is around 3 years of historical records) and old enough to leave at least 120 trading days in the dataset following the training end date to use for validation. Also it is selected a random ticker symbol in the Dow Jones, except 'DWDP', because it doesn't have enough historical records to do an evaluation with 750 trading days back.
 
@@ -321,6 +321,9 @@ The the final solution is to provide the user the option of using the following 
 * ARIMA
 * Prophet
 * LSTM
+
+The final solution is enclosed in the form of a Python file called `djia_stock_prediction.py` which contains the constructions developed in this project to manage the dataset, and creating and training the models listed above. This solution is recommended to be used through a Jupyter notebook since it provides a friendly environment where the user can perform experiments an visualizations.
+An example of the use of this solution can be found at https://github.com/egar-garcia/machine-learning-engineer-nanodegree-capstone/blob/master/StockPricePredictor_example.ipynb
 
 
 ## V. Conclusion
