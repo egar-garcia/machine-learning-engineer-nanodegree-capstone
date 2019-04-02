@@ -236,7 +236,7 @@ For each-one of the methods/models implemented in this project a specific class 
 * **Prophet** implemented in the class called `ProphetStockForecaster`, uses the underlying module `fbprophet.Prophet`.
 * **Long Short-Term Memory** implemented in the class called `LongShortTermMemoryStockForecaster`, uses the underlying module `keras.layers.LSTM`.
 
-#### 4. Evaluation of the Models
+#### 4. Evaluation and results
 
 In this phase was created the function to do the calculation of the evaluation metric which is RMSE (Root Mean Square Error), which is applied to measure the error in the validation set of the predictions of the closing prices against the ground truth.
 
@@ -245,6 +245,8 @@ Also in this phase was created the code in Python to generate and automate the e
 The evaluation results comes as a data-frame, which indicates per each one of the models the RMSE of their predictions against the ground truth applied to validation set conformed of given numbers of trading days ahead. This is also accompanied with a plot displaying the predicted closing prices agains the real values, those evaluations are displayed in the Results section of this document.
 
 For this phase, it was also created the code to display the reports of the performance (based on RMSE) per model and the percentage of improvement against the Linear Regression (which is the benchmarking model).
+
+Finally after the evaluations were performed the results were visualized and analyzed, which discussion is presented on the Results section of this report.
 
 
 ### Refinement
@@ -322,12 +324,11 @@ The the final solution is to provide the user the option of using the following 
 * Prophet
 * LSTM
 
-The final solution is enclosed in the form of a Python file called `djia_stock_prediction.py` which contains the constructions developed in this project to manage the dataset, and creating and training the models listed above. This solution is recommended to be used through a Jupyter notebook since it provides a friendly environment where the user can perform experiments an visualizations.
-An example of the use of this solution can be found at https://github.com/egar-garcia/machine-learning-engineer-nanodegree-capstone/blob/master/StockPricePredictor_example.ipynb
+The final solution is enclosed in the form of a Python file called `djia_stock_prediction.py` (available at https://github.com/egar-garcia/machine-learning-engineer-nanodegree-capstone/blob/master/djia_stock_prediction.py) which contains the constructions developed in this project to manage the dataset, and creating and training the models listed above. This solution is recommended to be used through a Jupyter notebook, since it provides a friendly environment where the user can perform experiments and visualizations.
+An example of the usage of this solution can be found at https://github.com/egar-garcia/machine-learning-engineer-nanodegree-capstone/blob/master/StockPricePredictor_example.ipynb
 
 
 ## V. Conclusion
-_(approx. 1-2 pages)_
 
 ### Free-Form Visualization
 In this section, you will need to provide some form of visualization that emphasizes an important quality about the project. It is much more free-form, but should reasonably support a significant result or characteristic about the problem that you want to discuss. Questions to ask yourself when writing this section:
@@ -336,29 +337,25 @@ In this section, you will need to provide some form of visualization that emphas
 - _If a plot is provided, are the axes, title, and datum clearly defined?_
 
 ### Reflection
-In this section, you will summarize the entire end-to-end problem solution and discuss one or two particular aspects of the project you found interesting or difficult. You are expected to reflect on the project as a whole to show that you have a firm understanding of the entire process employed in your work. Questions to ask yourself when writing this section:
-- _Have you thoroughly summarized the entire process you used for this project?_
-- _Were there any interesting aspects of the project?_
-- _Were there any difficult aspects of the project?_
-- _Does the final model and solution fit your expectations for the problem, and should it be used in a general setting to solve these types of problems?_
+
+The problem of predicting stock prices was actually a lot more difficult than originally was expected, the stock prices have a lot of fluctuations, unexpected political, economical or social events can cause the prices to suddenly and drop or rise, as mentioned in [guide_day_trading_online] the stock market mirrors the state of mind of the people involved in the market, which are driven by human emotions like euphoria or fear.
+
+Additionally, the problem is different to other machine learning problems since the predictions should take place strictly in the future and not distributed along the domain of predictors/predictions. For this particular kind of problems the way to address them is by using techniques for time series forecasting like the ones studied during this project.
+
+For results when addressing the problem of predicting stock prices in the future just by using the data already known where not very encouraging. The methods/models used in this project ARIMA, prophet and LSTM can at least give a tendency, which looks to be relevant in short term (up to around 10 weeks ahead), however the results does not seem to be precise enough to predict with certainty a stock closing price for a particular day.
+
+However, not everything is lost, with a variant on the mechanism for doing predictions, they can look way better, this is by using LTSM and periodically updating the dataset (ideally every day) and then doing the prediction for the next day, in this way the predictions for the next day would be more precise. Another advantage of LSTM is that retraining the model is not necessary, it was observed during the evaluation that after training the model this still gives good results for around 24 weeks ahead, it looks like even when the stock prices fluctuates LTSM can quickly adapt/correct the tendency.
+
+LTSM is not an easy algorithm to understand and then put in practice, there were some complications during its implementation, like the preprocessing to create the sub-series used as predictors and the mechanism to take advance on the existing updated data to support the prediction process. However the effort is worth, since when putting in function the predictions look impressive.
+
+Originally in the proposal the idea of the final solution was creating a Python file to be used in by the command line to perform the predictions, however the objective changed along the development of the project and instead to provide a set of constructions (classes) able to be used in a Jupyter environment or similar, this is because it was realized that this kind of tools provide a more friendly environment to experiment and analyze the data, targeting it to be used for data scientists and (financial) data analysts.
+
 
 ### Improvement
-In this section, you will need to provide discussion as to how one aspect of the implementation you designed could be improved. As an example, consider ways your implementation can be made more general, and what would need to be modified. You do not need to make this improvement, but the potential solutions resulting from these changes are considered and compared/contrasted to your current solution. Questions to ask yourself when writing this section:
-- _Are there further improvements that could be made on the algorithms or techniques you used in this project?_
-- _Were there algorithms or techniques you researched that you did not know how to implement, but would consider using if you knew how?_
-- _If you used your final solution as the new benchmark, do you think an even better solution exists?_
 
------------
+One aspect to improve is the mechanism to perform long term forecasting, not aiming to predict the prices for a particular day but more like a long term average, basically to know if a stock its going to follow a tendency to increase or decrease in the future. A possible way to do that is by doing preprocessing of the training data that involves smoothing the historical records used in the training, for example by applying a weighted average for centered in each trading day.
 
-**Before submitting, ask yourself. . .**
-
-- Does the project report you’ve written follow a well-organized structure similar to that of the project template?
-- Is each section (particularly **Analysis** and **Methodology**) written in a clear, concise and specific fashion? Are there any ambiguous terms or phrases that need clarification?
-- Would the intended audience of your project be able to understand your analysis, methods, and results?
-- Have you properly proof-read your project report to assure there are minimal grammatical and spelling mistakes?
-- Are all the resources used for this project correctly cited and referenced?
-- Is the code that implements your solution easily readable and properly commented?
-- Does the code execute without error and produce results similar to those reported?
+Another possible improvement would be by using technics of reinforcement learning for doing next day or even shorter term predictions, in last instance aiming to do forecast in real time targeting hours or minutes ahead, that would require an entire modification of the mechanism to keep the dataset update in shorter intervals, like an automation using a job.
 
 
 # VI. References
