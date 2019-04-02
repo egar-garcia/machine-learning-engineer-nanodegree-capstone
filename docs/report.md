@@ -2,7 +2,7 @@
 title: "Machine Learning Engineer Nanodegree"
 subtitle: "Capstone Project Report"
 author: Egar Garcia
-date: March 31st, 2019
+date: April 1st, 2019
 geometry: margin=1in
 output: pdf_document
 bibliography: capstone_proposal.bib
@@ -276,7 +276,7 @@ The models/methods to evaluate are listed bellow:
 
 * Linear Regression (the one used for benchmarking).
 * Linear Regression - Date Components (linear regression using day, month, year, week, day-of-week and day-of-year as predictors)
-* Arima
+* ARIMA
 * Prophet
 * Long Short Term Memory
 * Long Short Term Memory - daily prediction (LSTM simulating the daily update of the dataset and daily prediction for the next trading day)
@@ -331,6 +331,11 @@ An example of the usage of this solution can be found at https://github.com/egar
 ## V. Conclusion
 
 ### Free-Form Visualization
+
+The visualization shown in figure \ref{free_form_visualization} shows an important aspect about the prediction mechanism.
+
+![Daily update and prediction \label{free_form_visualization}][free_form_visualization]
+
 In this section, you will need to provide some form of visualization that emphasizes an important quality about the project. It is much more free-form, but should reasonably support a significant result or characteristic about the problem that you want to discuss. Questions to ask yourself when writing this section:
 - _Have you visualized a relevant or important quality about the problem, dataset, input data, or results?_
 - _Is the visualization thoroughly analyzed and discussed?_
@@ -368,3 +373,4 @@ Another possible improvement would be by using technics of reinforcement learnin
 [random_eval_plot]: figs/random_eval.png
 [random_eval_rmse]: figs/random_eval_rmse.png
 [random_eval_improvement]: figs/random_eval_improvement.png
+[free_form_visualization]: figs/free-form-visualization.png
