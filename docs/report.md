@@ -6,7 +6,7 @@ date: April 2nd, 2019
 geometry: margin=1in
 output: pdf_document
 bibliography: capstone_proposal.bib
-csl: ieee-with-url.csl
+csl: docs/ieee-with-url.csl
 ---
 
 
@@ -304,6 +304,7 @@ To measure how the models improve (or worsen) against the benchmarking model (wh
 $$ model\_improvement = (LinearRegression\_RMSE - Model\_RMSE) / LinearRegression\_RMSE $$
 
 The model improvement rate can be interpreted as follows:
+
 * A value of 1 (100%) means that the model has no error, then it was improved to perfection.
 * A value of 0 (0%) means that the model has the same performance than the linear regression, i.e. it was not improvement or worsening.
 * A positive value between 0 and 1 means that the model performs better than the liner regression, but still with some errors, the closer to 1 (100%) the smaller the errors in the predictions.
@@ -367,10 +368,10 @@ Another possible improvement would be by using technics of reinforcement learnin
 
 [//]: # (Image References)
 
-[DowJonesHistoric]: figs/historic_djia.png
-[DowJonesHistoricPerIndustry]: figs/historic_djia_per_industry.png
-[DowJonesCorrelation]: figs/correlation_djia_stocks.png
-[random_eval_plot]: figs/random_eval.png
-[random_eval_rmse]: figs/random_eval_rmse.png
-[random_eval_improvement]: figs/random_eval_improvement.png
-[free_form_visualization]: figs/free-form-visualization.png
+[DowJonesHistoric]: docs/figs/historic_djia.png
+[DowJonesHistoricPerIndustry]: docs/figs/historic_djia_per_industry.png
+[DowJonesCorrelation]: docs/figs/correlation_djia_stocks.png
+[random_eval_plot]: docs/figs/random_eval.png
+[random_eval_rmse]: docs/figs/random_eval_rmse.png
+[random_eval_improvement]: docs/figs/random_eval_improvement.png
+[free_form_visualization]: docs/figs/free-form-visualization.png
