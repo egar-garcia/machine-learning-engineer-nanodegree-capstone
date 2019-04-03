@@ -2,7 +2,7 @@
 title: "Machine Learning Engineer Nanodegree"
 subtitle: "Capstone Project Report"
 author: Egar Garcia
-date: April 1st, 2019
+date: April 2nd, 2019
 geometry: margin=1in
 output: pdf_document
 bibliography: capstone_proposal.bib
@@ -61,12 +61,12 @@ Where $N$ is the number of data points, $y_i$ is the observed value or ground tr
 
 ### Data Exploration
 
-The original proposal contemplated to get the date from an open dataset called "EOD data for all Dow Jones stocks" in Kaggle, which contained the historical data for Dow Jones stocks, however for some reason this dataset is not longer available. Then the alternative and solution used in this project is to extract the data from the original source, which is an API provided by IEX Group Inc. (https://iextrading.com), it provides access to stock historical records to developers and engineers for free.
+The original proposal contemplated to get the data from an open dataset called "EOD data for all Dow Jones stocks" in Kaggle, which contained the historical data for Dow Jones stocks, however for some reason this dataset is not longer available. Then the alternative and solution used in this project is to extract the data from the original source, which is an API provided by IEX Group Inc. (https://iextrading.com), it provides access to stock historical records to developers and engineers for free.
 
 The API provided by IEX (which documentation can be found at https://iextrading.com/developer/docs/#chart) allows to retrieve historical stock price information for a maximum of 5 years back to the current date.
 The API can provide historical records for several companies, but for this project only the records for the ones in the Dow Jones are retrieved. An important aspect to notice is that the market is closed on weekends and some defined holidays.
 
-The API retrieves the data in the in JSON format, which at the end contains records, where each record corresponds to the information of a trading day for a specific company, a company is identified by a ticker symbol (also known as stock symbol). For example to retrieve the historical stock prices for the ticker symbol MSFT (Microsoft Corporation) of the last 5 years, the call to the API would be https://api.iextrading.com/1.0/stock/aapl/chart/5y
+The API retrieves the data in the in JSON format, which at the end contains records, where each record corresponds to the information of a trading day for a specific company, a company is identified by a ticker symbol (also known as stock symbol). For example to retrieve the historical stock prices for the ticker symbol MSFT (Microsoft Corporation) of the last 5 years, the call to the API would be https://api.iextrading.com/1.0/stock/msft/chart/5y
 
 The historic stock price records contain the following columns:
 
@@ -96,7 +96,7 @@ The following is a fragment of how the historical stock looks for the thicker sy
 | 2014-03-03 | 68.7417 | 69.6913 | 68.6616 | 69.3117 | 59667923 |  0.199626 |         0.289 | 69.1371 |
 
 
-The purpose of this project is to predict the future values of the closing price, which corresponds to the column `close`. To make predictions is necessary to chose a subset of columns which values can be known a priory and used for the prediction, unfortunately all the column values except date and label (which finally is a variant of the date) are unknown before the occurrence of the respective trading days. Then, the only data that can be used to predict the future closing prices is the past closing prices and the company itself.
+The purpose of this project is to predict the future values of the closing price, which corresponds to the column `close`. To make predictions is necessary to chose a subset of columns which values can be known a priory and used for the prediction, unfortunately all the column values except date and label (which finally is a variant of the date) are unknown before the occurrence of the respective trading days. Then the only data that can be used to predict the future closing prices is the past closing prices and the company itself.
 
 
 ### Exploratory Visualization
@@ -115,7 +115,7 @@ In figure \ref{DowJonesCorrelation} is presented a visualization that shows the 
 
 ![Correlation among Dow Jones stocks \label{DowJonesCorrelation}][DowJonesCorrelation]
 
-Looking at the stocks one at a time, it looks like the stock prices fluctuates a lot and a clear pattern is not perceived, at least not at human comprehensible level, however several theories have been developed. This is understandable since the stock prices depend on a lot of different factors among them the company's financial health, economic supply-demand and even involving human emotions like trust, euphoria or panic.
+Looking at the stocks one at a time, it looks like the stock prices fluctuates a lot and a clear pattern is not perceived, at least not at a human comprehensible level. This is understandable since the stock prices depend on a lot of different factors like the company's financial health, economic supply-demand and even involving human emotions like trust, euphoria or panic.
 
 At a macro level it can be observed that they are common events that seem to affect the stock prices as a whole, like a rise and sudden fall of prices around the beginning of 2018, or a drop of prices at the end of 2018. However these kind of events also do not seem to have a comprehensible pattern.
 
@@ -128,7 +128,7 @@ A time series dataset is different, because they have an explicit dependence of 
 
 During the exploration of the dataset it was realized that the only data that we can know a priory and use to make the predictions are the dates, then this characteristic makes the problem to forecast the stock closing prices to be a time series forecasting problem.
 
-There are some known methods to address the problem of forecasting time series, the ones that are going to be used for the implementation of this projects are described bellow.
+There are some known methods to address the problem of forecasting time series, the ones that are are used during the implementation of this projects are described bellow.
 
 #### 1. Linear Regression
 
@@ -147,7 +147,7 @@ It is a very popular statistical method for time series analysis and forecasting
 
 #### 3. Prophet
 
-It is an open source forecasting tool developed by Facebook, it is optimized for the business forecast tasks encountered at Facebook. They claim that the default settings produce forecasts that are often accurate as those produced by skilled forecasters, with much less effort. [@prophet_facebook]
+It is an open source forecasting tool developed by Facebook, it is optimized for the business forecast tasks encountered at Facebook. They claim that the default settings produce forecasts that are often as accurate as those produced by skilled forecasters, with much less effort. [@prophet_facebook]
 
 
 #### 4. LSTM (Long Short-Term Memory):
@@ -159,41 +159,39 @@ Long Short-Term Memory networks are a special kind of RNNs (introduced by Hochre
 
 ### Benchmark
 
-To test the prediction's accuracy/performance for the machine learning methods used in this project, a couple of historical tests datasets for a ticker symbol are taken up to a given date and used to perform the training. Then the prediction is performed and benchmarked over validation sets for the following 1, 5, 10, 20, 40, 60 and 120 trading days, which is almost equal to predict for the next trading day and then 1, 2, 4, 8, 12 and 24 weeks, however there can be holidays in between.
+To test the prediction's accuracy/performance for the machine learning methods used in this project, a historical tests dataset for a ticker symbol up to a given date is taken and used to perform the training. Then the prediction is performed and benchmarked over validation sets for the following 1, 5, 10, 20, 40, 60 and 120 trading days, which is almost equal to predict for the next trading day and then 1, 2, 4, 8, 12 and 24 weeks ahead, if disregarding the holidays in between.
 
-To benchmark the performance of the different machine learning methods implemented in this project, they are compared against an initial naive solution which is produced via linear regression, where the predictor is the trading days' date (or a decomposition of it in day, month, year, week of year, day of week and day of year), and the predicted value the closing price.
-A result of the benchmarking can be expressed in terms of percentage of improving (or worsening) against the linear regression.
+To benchmark the performance of the different machine learning methods implemented in this project, they are compared against an initial naive solution which is produced via linear regression, where the predictor is the trading days' date, and the predicted value the closing price. A result of the benchmarking can be expressed in terms of percentage of improving (or worsening) against the linear regression, as it will be explained in the "Evaluation" section of this report.
 
 
 ## III. Methodology
 
 ### Data Preprocessing
 
-For this projects different ML methods/models are used, and the requirements for the inputs they receive are diverse, of course for all of them the outcome is the same, i.e. the closing price of the stock. It is also important to notice that all the methods performs the forecast for just one ticker symbol, then a common step is to filter the data set to get the records for the related ticker symbol (since the dataset contains the records for all the ticker symbols in the Dow Jones).
+For this project different machine learning methods/models are used, and the requirements for the inputs they receive are diverse, of course for all of them the outcome is the same, i.e. the closing price of the stock for a particular trading day. It is also important to notice that all the methods perform the forecast for just one ticker symbol, then a common step is to filter the data set to get the records for the related ticker symbol (since the dataset contains the records for all the ticker symbols in the Dow Jones).
 
 Each one of the methods/models addressed in this project requires its particular way to preprocess the data that is used in the training set, those are described bellow:
 
+* Linear regression: The training set requires a numeric representation of the date as a predictor (because dates are not supported), the preprocessing mechanism to prepare the training set consists in selecting just the `date` and `close` columns, then for the date its timestamp is calculated and this value is used as a predictor instead of the actual date. The model is trained by using the timestamp as a predictor and the closing price as the outcome's ground truth.
 
-* Linear regression: The training set requires a numeric representation of the date as a predictor (because dates are not supported), the preprocessing to prepare the training set consists in selecting just the `date` and `close` columns, then for the date its timestamp is calculated and using this value as a predictor instead of the actual date. The model is trained by using the timestamp as a predictor and the closing price as the outcome's ground truth.
-
-* Linear regression using date components: In this approach also to prepare the training set, the `date` and `close` columns are selected, then for the date the components: year, month, day, week, day-of-week and day-of-year are calculated. The model is trained by using the these components as predictors, they are numerical values so the linear regression can support them, the closing price is used as the outcome's ground truth.
+* Linear regression using date components: In this approach to prepare the training set, also the `date` and `close` columns are selected, then for the date the components: year, month, day, week, day-of-week and day-of-year are calculated. The model is trained by using the these components as predictors, they are numerical values so the linear regression can support them, the closing price is used as the outcome's ground truth.
 
 * ARIMA: This model only needs a sequence of ground truth consecutive values in the time series to do the training, then to prepare the training set only the column `close` needs to be selected, however an important aspect is that the order must be preserved.
 
 * Prophet: This model receives the date as predictor and the ground truth of the value to predict as outcome, however their columns should be named `ds` and `y` respectively. Then to prepare the training set for this model, the `date` and `close` columns are selected and then renamed.
 
-* LSTM: The preprocessing mechanism for this model is the most complex of all, because LSTM takes as predictors sequences of a given length (known as time-steps) containing consecutive values in a time series and the outcome is the next value in the time sequence, i.e. the predictor is a subsequence of the time series instead of a single value. To prepare the training set only the values in the column `close` are needed, the date is not necessary since the important factor is the order, however the preprocessing for this method consists in creating the subsequences with the closing prices previous to the date of the respective outcome. Also as in most deep-learning approaches it's recommended that the values (to predict in this case) are normalized, then for this project the closing prices are scaled to the range from 0 to 1.
+* LSTM: The preprocessing mechanism for this model is the most complex of all, because LSTM takes as predictors sequences of a given length (known as time-steps) containing consecutive values in a time series and the outcome is the next value in the time sequence, i.e. the predictor is a subsequence of the time series instead of a single value. To prepare the training set only the values in the column `close` are needed, the date is not necessary since the important factor is the order. The preprocessing for this method consists in creating the subsequences with the closing prices previous to the date of the respective outcome. Also as in most deep-learning approaches it's recommended that the values (to predict in this case) are normalized, then for this project the closing prices are scaled to the range from 0 to 1.
 
 In terms of the prediction, the mechanism is to query by a date range, then the set of trading days in that range is calculated and gathered together in an array. Again, each particular of method/model requires its own way to preprocess the data to be able to perform the prediction, those are described bellow:
 
 
-* Linear regression: The model requires as a numeric representation of the date to perform the prediction, the preprocessing to prepare the data for prediction consists on transforming the array of trading days to a data-frame with only one column `date`, then transforming the column `date` to a timestamp, which is the predictor used during training.
+* Linear regression: The model requires as a numeric representation of the date to perform the prediction, the preprocessing mechanism to prepare the data for prediction consists on transforming the array of trading days to a data-frame with only one column `date`, then transforming the column `date` to a timestamp, which is the predictor used during training.
 
-* Linear regression using date components: For this approach the preprocessing consist on transforming the array of trading days to a data-frame with only one column `date`, then the date is broken down in the components: year, month, day, week, day-of-week and day-of-year, which are the predictors used during training.
+* Linear regression using date components: For this approach the preprocessing mechanism consist on transforming the array of trading days to a data-frame with only one column `date`, then the date is broken down in the components: year, month, day, week, day-of-week and day-of-year, which are the predictors used during training.
 
-* ARIMA: For this model only the number of future points to predict is required, then the preprocessing only consist on getting the size of the array containing the trading days to predict.
+* ARIMA: For this model only the number of future points to predict is required, then the preprocessing mechanism only consist on getting the size of the array containing the trading days to predict.
 
-* Prophet: Same as the previous one, this model only needs the number of future points to predict, then the preprocessing only consist on getting the size of the array containing the trading days to predict.
+* Prophet: Same as the previous one, this model only needs the number of future points to predict, then the preprocessing mechanism only consist on getting the size of the array containing the trading days to predict.
 
 * LSTM: The preprocessing mechanism for the prediction set for this model is also complex, because LSTM takes as predictors sequences of a given length containing consecutive values in a time series and the predicted value would be the  next value in the time sequence. The preparation/preprocessing of the prediction set consist in creating subsequences containing the closing prices previous to the date to predict, normalized to a range from 0 to 1, since these are the inputs that the LSTM network accept.
 
@@ -210,25 +208,25 @@ An object oriented approach has been taken to create a class called `Dataset` wh
 * Loading and saving the data to files.
 * Filtering the data by date range or ticker symbols.
 
-Another class called `TradingDaysHelper` is created with the purpose of getting the existing trading days (the days that the stock market is open) in a date range, or to get a determined number of trading days after a given date (this is useful to perform validations for a number of days ahead). The market is closed on weekend and some holidays that can be loaded from a file (by default named `market_holidays.txt`). The use of objets of this class is very important since not all the dates in a date range are predictable, just the ones when the market is open.
+Another class called `TradingDaysHelper` is created with the purpose of getting the existing trading days (the days that the stock market is open) in a date range, or to get a determined number of trading days after a given date (this is useful to perform validations for a number of days ahead). The market is closed on weekends and some holidays that can be loaded from a file (by default named `market_holidays.txt`). The use of objets of this class is very important since not all the dates in a date range are predictable, just the ones when the market is open.
 
 #### 2. Data exploration and visualization
 
-In this phase were created the code in Python to generate the visualizations presented previously in the "Exploratory Visualization" section of this report. These visualizations aimed to plot the historical closing prices of the stocks, compare them with the actual Dow Jones Industrial Index and retrieve the correlation among the related companies' stocks.
+In this phase it was created the code in Python to generate the visualizations presented previously in the "Exploratory Visualization" section of this report. These visualizations aimed to plot the historical closing prices of the stocks, compare them with the actual Dow Jones Industrial Index and retrieve the correlation among the related companies' stocks.
 
-Also a purpose was trying to identify patterns that could help to select some machine learning methods or to do some treatment to the data. However not evident (at least by humans) patterns were observed, which lead to reinforce the decision of using techniques to forecast time series.
+Also another purpose was trying to identify patterns that could help to select some machine learning methods or to do some treatment to the data. Unfortunately not evident (at least by humans) patterns were observed, which lead to reinforce the decision of using techniques to forecast time series.
 
 #### 3. Implementation of the machine learning methods/Models
 
 Again an object oriented approach was taken to represent each one of the machine learning methods/models as an object. A super class called `StockForecasterModel` represents a generic ML model which provides methods to do the training and perform predictions, as well as load or save the object (model) to a file.
 
-An object/model is restricted to perform predictions for only one ticker symbol, this is because a time series only makes sense for the historical records of one particular ticker symbol.
+A model's object is restricted to perform predictions for only one ticker symbol, this is because a time series only makes sense for the historical records of one particular ticker symbol.
 
 To perform the training, a dataset is provided to get the historical records of the ticker symbol, and optionally a date range (given by a start and end date) can be provided to only consider the records that fall in that range for the training.
 
-To do predictions a date range is given, then the purpose is to predict the closing prices in the trading days that exist in that range. The result is retrieved as a data-frame that contains the date of the trading days in the range with their respective predicted closing price.
+To do predictions a date range is given, then the purpose is to predict the closing prices in the trading days that exist in that range. The results are retrieved as a data-frame that contains the date of the trading days in the range with their respective predicted closing price.
 
-For each-one of the methods/models implemented in this project a specific class created to do the specifics for method, like preprocessing/preparation of the data used for training and prediction, instantiation and fitting of the underlaying models, preparation of the results, etc. The models implemented for this project, their classes and underlying modules are listed bellow:
+For each-one of the methods/models implemented in this project a specific class is created to do the specifics for method, like preprocessing/preparation of the data used for training and prediction, instantiation and fitting the underlaying models, preparation of the results, etc. The models implemented in this project with their classes and underlying modules are listed bellow:
 
 * **Linear Regression** implemented in the class  `LinearRegressionStockForecaster`, uses the underlying module `sklearn.linear_model.LinearRegression`.
 * **Linear regression using date components** implemented in the class which name is  `DateComponentsLinearRegressionStockForecaster`, as the Linear regression it also uses the underlying module `sklearn.linear_model.LinearRegression`.
@@ -238,30 +236,30 @@ For each-one of the methods/models implemented in this project a specific class 
 
 #### 4. Evaluation and results
 
-In this phase was created the function to do the calculation of the evaluation metric which is RMSE (Root Mean Square Error), which is applied to measure the error in the validation set of the predictions of the closing prices against the ground truth.
+In this phase it was created the function to do the calculation of the evaluation metric which is RMSE (Root Mean Square Error), which is applied to measure the error in the validation set of the predictions of the closing prices against the ground truth.
 
-Also in this phase was created the code in Python to generate and automate the evaluation of the performance of the different implemented ML models, selecting a ticker symbol a data range for training and number of further trading days to do the validation.
+Also in this phase it was created the code in Python to generate and automate the evaluation of the performance of the different implemented machine learning models, selecting a ticker symbol a data range for training and number of further trading days to do the validation.
 
-The evaluation results comes as a data-frame, which indicates per each one of the models the RMSE of their predictions against the ground truth applied to validation set conformed of given numbers of trading days ahead. This is also accompanied with a plot displaying the predicted closing prices agains the real values, those evaluations are displayed in the Results section of this document.
+The evaluation results comes as a data-frame, which indicates per each one of the models the RMSE of their predictions against the ground truth applied to a validation set containing a given numbers of trading days ahead. This is also accompanied with a plot displaying the predicted closing prices agains the real values, those evaluations are displayed in the "Results" section of this document.
 
 For this phase, it was also created the code to display the reports of the performance (based on RMSE) per model and the percentage of improvement against the Linear Regression (which is the benchmarking model).
 
-Finally after the evaluations were performed the results were visualized and analyzed, which discussion is presented on the Results section of this report.
+Finally after the evaluations were performed the results were visualized and analyzed, which discussion is presented on the "Results" section of this report.
 
 
 ### Refinement
 
-The first aspect that was refined during the implementation was related with the mechanism for getting the dataset, IEX API only allows to get records for the previous 5 years, however the dataset management does not have to be limited by this constraint since an old dataset can be updated just by adding the missing records, and in this way having a mechanism for storing more data and keeping the dataset updated.
+The first aspect that was refined during the implementation was related with the mechanism for getting the dataset, the IEX's API only allows to get historical records for the previous 5 years, however the dataset management does not have to be limited by this constraint since an old dataset can be updated just by adding the missing records, and in this way having a mechanism for storing more data and keeping the dataset updated.
 
-Another refined aspect was related to the prediction using linear regression, the idea was do do a variation of it to instead consider as predictors the date components (day, month, year, week, day-of-week and day-of-year) wondering if they play a role in determining the closing price of the stocks, however as it will be shown in the results sections the outcomes are not really consistent.
+Another refined aspect was related to the prediction using linear regression, the idea was to do a variation of it to consider as predictors the date components (day, month, year, week, day-of-week and day-of-year) instead of just the date, wondering if they play a role in determining the closing price of the stocks, however as it will be shown in the "Results" section they do not seem to play a significant role.
 
 In the case of Prophet, there was just a small improvement to be out of the default values by turning on the flag `daily_seasonality` when fitting the model, matching the way that the closing stock prices are predicted, i.e. in a daily like way. This in general produced better results for the predictions.
 
-The biggest refinement was done for LSTM. In articles like [@stock_prices_prediction] the predicted closing prices seem to be "spectacular", however to do the prediction they use the validation set, which at the beginning seems to be like cheating, however in a second look it is actually a different approach to for the prediction mechanism. In all the other methods it is assumed that the known records are used in the training set, then the closing prices of dates to predict are completely unknown, and the model just tries to infer those values based on the training data.
+The biggest refinement was done for LSTM. In studies like [@stock_prices_prediction] the predicted closing prices seem to be "spectacular", however to do the prediction they use the validation set, which at the beginning seems to be like cheating, however in a second look it is actually a different approach to for the prediction mechanism. In all the other methods it is assumed that the known records are used in the training set, then the closing prices of dates to predict are completely unknown, and the model just tries to infer those values based on the training data.
 
-However, the full potential of LTSM is reached if the dataset is periodically updated (ideally every day), that can help the model to get better predictions for the days ahead, without the need of retraining the model. This mechanism is identified in this project as "Long Short Term Memory - daily prediction" and the way it works is by updating the model at the end of each day and then doing the prediction for the next day. In this way the new data also play a role for predicting the future data without training again the model. This is the mechanism in which can be reached the "spectacular" results mentioned above.
+However, the full potential of LTSM is reached if the dataset is periodically updated (ideally every day), that can help the model to get better predictions for the days ahead, without the need of retraining the model. This mechanism is identified in this project as "Long Short Term Memory - daily prediction" and the way it works is by updating the model at the end of each day and then doing the prediction for the next day. In this way the new data also play a role for predicting the future data without training the model again. This is the mechanism in which can be reached the "spectacular" results mentioned above.
 
-The refinement done for LTSM was the incorporation of those two options, 1) inferring future closing prices assuming they are unknown (or if the dataset has  not being updated), similarly to the other models and which might be useful for long term predictions, and 2) taking advance of the updated dataset to do the predictions for next or future days. Details of this implementation can be seen in the code of the function `predict` in the class `LongShortTermMemoryStockForecaster`.
+The refinement done for LTSM was the incorporation of those two options, 1) inferring future closing prices assuming they are unknown (or if the dataset has not being updated), similarly to the other models and which might be useful for long term predictions, and 2) taking advance of the updated dataset to do the predictions for the next or future days, basically it consist in constructing the subsequence used as predictor with updated data. Details of this implementation can be seen in the code of the function `predict` in the class `LongShortTermMemoryStockForecaster`.
 
 
 ## IV. Results
@@ -270,7 +268,7 @@ The refinement done for LTSM was the incorporation of those two options, 1) infe
 
 Several examples of evaluations can be found at https://github.com/egar-garcia/machine-learning-engineer-nanodegree-capstone/blob/master/StockPricePredictor-Project-Development.ipynb where the models were evaluated for some ticker symbols and points in time. For purposes of space in this document only the official evaluation would be included.
 
-The official evaluation consist in randomly select a date range for training, it should contain 750 trading days (which is around 3 years of historical records) and old enough to leave at least 120 trading days in the dataset following the training end date to use for validation. Also it is selected a random ticker symbol in the Dow Jones, except 'DWDP', because it doesn't have enough historical records to do an evaluation with 750 trading days back.
+The official evaluation consist in randomly select a date range for training, it should contain 750 trading days (which is around 3 years of historical records) and being old enough to leave at least 120 trading days in the dataset following the training end date to use for validation. Also it is selected a random ticker symbol in the Dow Jones, except 'DWDP', because it doesn't have enough historical records to do an evaluation with 750 trading days back.
 
 The models/methods to evaluate are listed bellow:
 
@@ -281,50 +279,52 @@ The models/methods to evaluate are listed bellow:
 * Long Short Term Memory
 * Long Short Term Memory - daily prediction (LSTM simulating the daily update of the dataset and daily prediction for the next trading day)
 
-The RMSE is calculated agains the ground truth in the validation set for the following 1, 5, 10, 20, 40, 60 and 120 trading days after the training end date. The results are observed in figure \ref{random_eval_rmse}, the models that performed the best (with the minimum RMSE) are highlighted in yellow.
+The RMSE is calculated agains the ground truth in the validation set for the following 1, 5, 10, 20, 40, 60 and 120 trading days after the training end date.
+
+The results are observed in figure \ref{random_eval_rmse}, the models that performed the best (with the minimum RMSE) are highlighted in yellow. For this report the random selection resulted in the ticker symbol 'WBA' (Walgreens Boots Alliance Inc.) and the training date range from 2015-04-21 to 2018-04-12.
 
 ![Evaluation results by RMSE \label{random_eval_rmse}][random_eval_rmse]
 
-In figure \ref{random_eval_plot} it can be visualized how the predictions performed for each one of the evaluated models/methods in comparison with the validation set which contains the ground truth.
+In figure \ref{random_eval_plot} it can be visualized how the predictions performed for each one of the evaluated models/methods in comparison with the validation set which contains the ground truth. As it can be observed "Long Short Term Memory - daily prediction" looks particularly impressive.
 
 ![Predictions against ground truth of evaluated models \label{random_eval_plot}][random_eval_plot]
 
-It's worth to mention that during the work done for this project two different prediction problems have been found:
+It's worth to mention that during the work done for this project two different prediction mechanisms have been found:
 
-1. Predicting the closing prices for a date range in the future. In here the future data is completely unknown and the model would be used to forecast the closing prices or at least to describe a tendency. This is an extremely difficult problem and it seems that the models studied in this project are not able to do predictions with a lot of accuracy, however by the evaluation results looks like Arima, Prophet and LSTM perform similarly and at least can give a tendency in short term even significant up to 40 or 60 trading days (8 or 12 weeks) in the future.
+1. Predicting the closing prices for a date range in the future. In here the future data is completely unknown and the model would be used to forecast the closing prices for all the involved trading days or at least to describe a tendency. This is an extremely difficult problem and it seems that the models studied in this project are not able to do predictions with a lot of certainty, however by the evaluation results looks like Arima, Prophet and LSTM perform similarly and at least can give a tendency in short term even significant up to 40 or 60 trading days (8 or 12 weeks) in the future.
 
-2. Predicting the closing price for the next day. Assuming that the dataset is periodically (ideally every day) updated and the problem is to predict the closing price for the next day. For this problem LSTM definitively excels, it reports consistently row RMSEs even for 120 trading days (24 weeks) in the future after training.
+2. Predicting the closing price for the next day with and updated dataset. Assuming that the dataset is periodically (ideally every day) updated and the problem is reduced to predict the closing price for the next day. For this problem LSTM definitively excels, it reports consistently row RMSEs even for 120 trading days (24 weeks) in the future after training.
 
-At the end the purpose of the project is to give options to the customer to address those two described problems or something in between, for that reason rater than selecting only one model as a solution, the solution is to provide the user the option or using some of the models studied in this project.
+At the end more than creating a fixed predictor, the purpose of the project shifted to give options to the user to address those two described problems (or maybe something in between), for that reason rater than selecting only one model as a solution, the solution is to provide the user the option or using some of the models studied in this project.
 
 
 ### Justification
 
-To measure how the models improve (or worsen) against the benchmarking model which is the Linear Regression a ratio (expressed as percentage) of improvement is calculate with the following formula:
+To measure how the models improve (or worsen) against the benchmarking model (which is the Linear Regression) a ratio (expressed as percentage) of improvement is calculate with the following formula:
 $$ model\_improvement = (LinearRegression\_RMSE - Model\_RMSE) / LinearRegression\_RMSE $$
 
-Improvement rate can be interpreted as follows:
-* A value of 1 (100%) means that the model has no error, then it was improved to the perfection.
+The model improvement rate can be interpreted as follows:
+* A value of 1 (100%) means that the model has no error, then it was improved to perfection.
 * A value of 0 (0%) means that the model has the same performance than the linear regression, i.e. it was not improvement or worsening.
 * A positive value between 0 and 1 means that the model performs better than the liner regression, but still with some errors, the closer to 1 (100%) the smaller the errors in the predictions.
 * A negative value means that the performance of the model is worst than the linear regression.
 
-In figure \ref{random_eval_improvement} the rate/percentage of improvement against the benchmarking model (Linear Regression) is presented, this is organized per number of following trading days after the training end date, the methods that performed the best are highlighted in yellow.
+In figure \ref{random_eval_improvement} the rate/percentage of improvement against the benchmarking model (Linear Regression) is presented for the previous evaluation, this is organized per number of following trading days after the training end date, the methods that performed the best are highlighted in yellow.
 
 ![Improvement in regards to Linear Regression of evaluated models \label{random_eval_improvement}][random_eval_improvement]
 
-From the results it can be justified that the method "Linear Regression - Date Components" to be ruled out since it does not really present an improvement, even in other evaluations included in the GitHub repository mentioned above even present inconsistencies.
+From those results it can be justified to rule out the method "Linear Regression - Date Components", since it does not really present an improvement, even in other evaluations included in the GitHub repository mentioned above it presents inconsistencies.
 
 As stated in the bellow section the results shown that ARIMA, Prophet and LSTM present a similar performance behavior in short term and up to 40-60 trading days in the future. LSTM used to perform daily predictions in an updated dataset presents significant improvement even at 120 trading days ahead.
 
 The the final solution is to provide the user the option of using the following models to do predictions for the stock closing prices:
 
-* Linear Regression (since is very well known)
+* Linear Regression (since its usage is very standardized)
 * ARIMA
 * Prophet
 * LSTM
 
-The final solution is enclosed in the form of a Python file called `djia_stock_prediction.py` (available at https://github.com/egar-garcia/machine-learning-engineer-nanodegree-capstone/blob/master/djia_stock_prediction.py) which contains the constructions developed in this project to manage the dataset, and creating and training the models listed above. This solution is recommended to be used through a Jupyter notebook, since it provides a friendly environment where the user can perform experiments and visualizations.
+The final solution is enclosed in the form of a Python file called `djia_stock_prediction.py` (available at https://github.com/egar-garcia/machine-learning-engineer-nanodegree-capstone/blob/master/djia_stock_prediction.py) which contains the constructions developed in this project to manage the dataset, and creating/training the models listed above. This solution is recommended to be used through a Jupyter notebook, since it provides a friendly environment where the user can perform experiments and visualizations.
 An example of the usage of this solution can be found at https://github.com/egar-garcia/machine-learning-engineer-nanodegree-capstone/blob/master/StockPricePredictor_example.ipynb
 
 
@@ -332,35 +332,35 @@ An example of the usage of this solution can be found at https://github.com/egar
 
 ### Free-Form Visualization
 
-The visualization shown in figure \ref{free_form_visualization} shows an important aspect about the prediction mechanism.
+The visualization shown in figure \label{free_form_visualization} displays the predictions using a Long Short-Term Memory forecaster for one year from 2018-04-01 for the ticker symbol 'BA' (Boeing Co.) and training data range from 2014-03-24 to 2018-03-31, i.e. more than 4 years of historical records for training, however just one year of training data is plotted --in blue-- for visual purposes.
 
 ![Daily update and prediction \label{free_form_visualization}][free_form_visualization]
 
-In this section, you will need to provide some form of visualization that emphasizes an important quality about the project. It is much more free-form, but should reasonably support a significant result or characteristic about the problem that you want to discuss. Questions to ask yourself when writing this section:
-- _Have you visualized a relevant or important quality about the problem, dataset, input data, or results?_
-- _Is the visualization thoroughly analyzed and discussed?_
-- _If a plot is provided, are the axes, title, and datum clearly defined?_
+This is a radical example of the difference of doing predictions (for future dates) just with the information given in training --plotted in green--, against the mechanism when then dataset is daily updated and the prediction done for the next trading day --plotted in red--, they can be contrasted with the ground truth --plotted in orange--.
+
+The red line looks to do a pretty good job with the predictions, even when this particular stock has a lot of volatility, the LSTM's training seems to be effective enough to correct the tendency and even performing well after 1 year without retraining. This is a clear example that shows how the predicting performance that LSTM can reached using by maintaining an updated dataset and predicting for the next trading day.
+
 
 ### Reflection
 
-The problem of predicting stock prices was actually a lot more difficult than originally was expected, the stock prices have a lot of fluctuations, unexpected political, economical or social events can cause the prices to suddenly and drop or rise, as mentioned in [guide_day_trading_online] the stock market mirrors the state of mind of the people involved in the market, which are driven by human emotions like euphoria or fear.
+The problem of predicting stock prices was actually a lot more difficult than originally was expected, the stock prices have a lot of fluctuations where unexpected political, economical or social events can cause the prices to suddenly drop or rise, as mentioned in [guide_day_trading_online] the stock market mirrors the state of mind of the people involved, which are driven by human emotions like euphoria or fear.
 
-Additionally, the problem is different to other machine learning problems since the predictions should take place strictly in the future and not distributed along the domain of predictors/predictions. For this particular kind of problems the way to address them is by using techniques for time series forecasting like the ones studied during this project.
+Additionally, the problem is very different to other machine learning problems since the predictions should take place strictly in the future and not distributed along the domain of predictors/predictions. For this particular kind of problems the way to address them is by using techniques for time series forecasting like the ones studied during this project.
 
-For results when addressing the problem of predicting stock prices in the future just by using the data already known where not very encouraging. The methods/models used in this project ARIMA, prophet and LSTM can at least give a tendency, which looks to be relevant in short term (up to around 10 weeks ahead), however the results does not seem to be precise enough to predict with certainty a stock closing price for a particular day.
+The results obtained when addressing the problem of predicting stock prices in the future just by using the data already known (and used in training) where not very encouraging. The methods/models used in this project ARIMA, Prophet and LSTM can at least give a tendency, which looks to be relevant in short term (up to around 10 weeks ahead), however the results does not seem to be precise enough to predict with certainty a stock closing price for a particular day.
 
-However, not everything is lost, with a variant on the mechanism for doing predictions, they can look way better, this is by using LTSM and periodically updating the dataset (ideally every day) and then doing the prediction for the next day, in this way the predictions for the next day would be more precise. Another advantage of LSTM is that retraining the model is not necessary, it was observed during the evaluation that after training the model this still gives good results for around 24 weeks ahead, it looks like even when the stock prices fluctuates LTSM can quickly adapt/correct the tendency.
+However, not everything is lost, with a variant on the mechanism for doing predictions, they can look way better, this is by using LTSM and periodically updating the dataset (ideally every day) and then doing the prediction for the next day, in this way the predictions for the next day would be more precise. Another advantage of LSTM is that retraining the model is not necessary, it was observed during the evaluation that after training the model this still gives good results for around 24 weeks ahead, it looks like even when the stock prices fluctuates LTSM can quickly adapt/correct the tendencies.
 
-LTSM is not an easy algorithm to understand and then put in practice, there were some complications during its implementation, like the preprocessing to create the sub-series used as predictors and the mechanism to take advance on the existing updated data to support the prediction process. However the effort is worth, since when putting in function the predictions look impressive.
+LTSM is not an easy algorithm to understand and then put in practice, there were some complications during its implementation, like implementing the preprocessing mechanism to create the sub-series used as predictors and the mechanism to take advance on the existing updated data to support the prediction process.
 
-Originally in the proposal the idea of the final solution was creating a Python file to be used in by the command line to perform the predictions, however the objective changed along the development of the project and instead to provide a set of constructions (classes) able to be used in a Jupyter environment or similar, this is because it was realized that this kind of tools provide a more friendly environment to experiment and analyze the data, targeting it to be used for data scientists and (financial) data analysts.
+Originally in the proposal the idea of the final solution was creating a Python file to be used by the command line to perform the predictions, however the objective changed along the development of the project and instead shifted to provide a set of constructions (classes) able to be used in a Jupyter environment or similar, this is because it was realized that this kind of environments provide a more friendly framework to experiment and analyze the data, targeting it to be used for data scientists and/or (financial) data analysts.
 
 
 ### Improvement
 
-One aspect to improve is the mechanism to perform long term forecasting, not aiming to predict the prices for a particular day but more like a long term average, basically to know if a stock its going to follow a tendency to increase or decrease in the future. A possible way to do that is by doing preprocessing of the training data that involves smoothing the historical records used in the training, for example by applying a weighted average for centered in each trading day.
+One aspect to improve is the mechanism to perform long term forecasting, not aiming to predict the prices for a particular day but more like a long term average, basically to know if a stock its going to follow a tendency to increase or decrease in the future. A possible way to do that is by doing preprocessing of the training data that involves smoothing the historical records used in the training, for example by applying a weighted average applied to each trading day.
 
-Another possible improvement would be by using technics of reinforcement learning for doing next day or even shorter term predictions, in last instance aiming to do forecast in real time targeting hours or minutes ahead, that would require an entire modification of the mechanism to keep the dataset update in shorter intervals, like an automation using a job.
+Another possible improvement would be by using technics of reinforcement learning for doing next day or even shorter term predictions, in last instance aiming to do forecast in real time targeting hours or minutes ahead, that would require an entire modification of the mechanism to keep the dataset update in shorter intervals, like the creation of an automated job to do the updates.
 
 
 # VI. References
