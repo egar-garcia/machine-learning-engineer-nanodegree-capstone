@@ -30,6 +30,8 @@ The stock exchange that are leading the U.S. include the New York Stock Exchange
 
 Projecting how the stock market will perform is a very difficult thing to do, there are so many factors involved in the prediction some of them emotional or irrational, which combined with the prices volatility make difficult to predict with a high degree of accuracy. Abundant information is available in the form of historical stock prices, which make this problem suitable for the use of machine learning algorithms.
 
+A machine learning model is fed with historical stock price records, these are used to perform a training process on the model after which the model would be ready to perform predictions. There are multiple options to obtain historical records, a popular one (and the one used in this project) is an API provided by IEX Group Inc. which offers free access to historical stock price records up to five years old.
+
 Investment firms, hedge funds and individuals have been using financial models to better understand the market behavior and attempt to make projections in order to make profitable investments and trades.
 
 
@@ -96,6 +98,20 @@ The following is a fragment of how the historical stock looks for the thicker sy
 | 2014-03-03 | 68.7417 | 69.6913 | 68.6616 | 69.3117 | 59667923 |  0.199626 |         0.289 | 69.1371 |
 
 
+Per year there are from 251 to 253 trading days, since the market is closed on weekends and some holidays:
+
+* 2014 had 252 trading days
+* 2015 had 252 trading days
+* 2016 had 252 trading days
+* 2017 had 251 trading days
+* 2018 had 251 trading days
+* 2019 is expected to have 252 trading days
+* 2020 is expected to have 253 trading days
+
+That means that each company in the Dow Jones would have from 251 to 253 historical records per year, except for 'DWDP' (DowDuPont Inc.) since its records started to appear on 2017-09-01.
+
+In a 5 years period from 2014-03-24 to 2019-03-23 (which was the one used during the development), there were 1259 historical records per company, with the exception of 'DWPD' which had 390 historical records. The historical records of the actual Dow Jones Industrial Average are also included in the dataset which would add another 1259 records. Then for this 5 year period there were 38160 historical stock price records in total ($1259 \times 29 + 390 + 1259 = 38160$).
+
 The purpose of this project is to predict the future values of the closing price, which corresponds to the column `close`. To make predictions is necessary to chose a subset of columns which values can be known a priory and used for the prediction, unfortunately all the column values except date and label (which finally is a variant of the date) are unknown before the occurrence of the respective trading days. Then the only data that can be used to predict the future closing prices is the past closing prices and the company itself.
 
 
@@ -117,7 +133,8 @@ In figure \ref{DowJonesCorrelation} is presented a visualization that shows the 
 
 Looking at the stocks one at a time, it looks like the stock prices fluctuates a lot and a clear pattern is not perceived, at least not at a human comprehensible level. This is understandable since the stock prices depend on a lot of different factors like the company's financial health, economic supply-demand and even involving human emotions like trust, euphoria or panic.
 
-At a macro level it can be observed that they are common events that seem to affect the stock prices as a whole, like a rise and sudden fall of prices around the beginning of 2018, or a drop of prices at the end of 2018. However these kind of events also do not seem to have a comprehensible pattern.
+At a macro level it can be observed that they are common events that seem to affect the stock prices as a whole, like a rise and sudden fall of prices around the beginning of 2018, or a generalized drop on the stock prices at the end of 2018. However these kind of events also do not seem to have a (humanly) comprehensible pattern either.
+
 
 
 ### Algorithms and Techniques
@@ -152,16 +169,27 @@ It is an open source forecasting tool developed by Facebook, it is optimized for
 
 #### 4. LSTM (Long Short-Term Memory):
 
-A Recurrent Neural Network (RNN) can be thought of as multiple copies of the same network, each passing a message to a successor, aiming for them to learn from the past [@undestanding_ltsm]. RNNs are good in handling sequential data but they have two main problems, the first one called "Vanishing/Exploding Gradient problem" presented as a result of the weights being repeated several times, and the second one called "Long-Term Dependencies problem" that happens when the context is far away [@lstm_scratch].
+A Recurrent Neural Network (RNN) can be thought of as multiple copies of the same network, each passing a message to a successor, aiming for them to learn from the past [@undestanding_lstm]. RNNs are good in handling sequential data but they have two main problems, the first one called "Vanishing/Exploding Gradient problem" presented as a result of the weights being repeated several times, and the second one called "Long-Term Dependencies problem" that happens when the context is far away [@lstm_scratch].
 
-Long Short-Term Memory networks are a special kind of RNNs (introduced by Hochreiter & Schmidhuber in 1997 [@lstm]) with capability of handling Long-Term dependencies and also provide a solution to the Vanishing/Exploding Gradient problem [@lstm_scratch]. They are currently used to address difficult sequence problems in machine learning and achieve state-of-the-art results [@ltsm_python_keras].
+Long Short-Term Memory networks are a special kind of RNNs (introduced by Hochreiter & Schmidhuber in 1997 [@lstm]) with capability of handling Long-Term dependencies and also provide a solution to the Vanishing/Exploding Gradient problem [@lstm_scratch]. They are currently used to address difficult sequence problems in machine learning and achieve state-of-the-art results [@lstm_python_keras].
 
 
 ### Benchmark
 
-To test the prediction's accuracy/performance for the machine learning methods used in this project, a historical tests dataset for a ticker symbol up to a given date is taken and used to perform the training. Then the prediction is performed and benchmarked over validation sets for the following 1, 5, 10, 20, 40, 60 and 120 trading days, which is almost equal to predict for the next trading day and then 1, 2, 4, 8, 12 and 24 weeks ahead, if disregarding the holidays in between.
+To test the prediction's accuracy/performance for the machine learning methods used in this project, a historical test dataset for a ticker symbol up to a given date is taken and used to perform the training. Then the prediction is performed and benchmarked over validation sets for the following 1, 5, 10, 20, 40, 60 and 120 trading days, which is almost equal to predict for the next trading day and then 1, 2, 4, 8, 12 and 24 weeks ahead, if disregarding the holidays in between.
 
-To benchmark the performance of the different machine learning methods implemented in this project, they are compared against an initial naive solution which is produced via linear regression, where the predictor is the trading days' date, and the predicted value the closing price. A result of the benchmarking can be expressed in terms of percentage of improving (or worsening) against the linear regression, as it will be explained in the "Evaluation" section of this report.
+To benchmark the performance of the different machine learning methods implemented in this project, they are compared against an initial naive solution which is produced via linear regression, where the predictor is the trading days' date, and the predicted value the closing price.
+
+The results of the benchmarking can be expressed in terms of an improvement (or worsening) ratio against the linear regression. The ratio (expressed as well as percentage) of improvement is calculate with the following formula:
+$$ model\_improvement = (LinearRegression\_RMSE - Model\_RMSE) / LinearRegression\_RMSE $$
+
+The model improvement ratio can be interpreted as follows:
+
+* A value of 1 (100%) means that the model has no error, i.e. it was improved to perfection.
+* A value of 0 (0%) means that the model has the same performance than the linear regression, i.e. it was not improvement or worsening.
+* A positive value between 0 and 1 means that the model performs better than the liner regression, but still with some errors, the closer to 1 (100%) the smaller the errors in the predictions.
+* A negative value means that the performance of the model is worst than the linear regression.
+
 
 
 ## III. Methodology
@@ -253,13 +281,29 @@ The first aspect that was refined during the implementation was related with the
 
 Another refined aspect was related to the prediction using linear regression, the idea was to do a variation of it to consider as predictors the date components (day, month, year, week, day-of-week and day-of-year) instead of just the date, wondering if they play a role in determining the closing price of the stocks, however as it will be shown in the "Results" section they do not seem to play a significant role.
 
-In the case of Prophet, there was just a small improvement to be out of the default values by turning on the flag `daily_seasonality` when fitting the model, matching the way that the closing stock prices are predicted, i.e. in a daily like way. This in general produced better results for the predictions.
-
 The biggest refinement was done for LSTM. In studies like [@stock_prices_prediction] the predicted closing prices seem to be "spectacular", however to do the prediction they use the validation set, which at the beginning seems to be like cheating, however in a second look it is actually a different approach to for the prediction mechanism. In all the other methods it is assumed that the known records are used in the training set, then the closing prices of dates to predict are completely unknown, and the model just tries to infer those values based on the training data.
 
-However, the full potential of LTSM is reached if the dataset is periodically updated (ideally every day), that can help the model to get better predictions for the days ahead, without the need of retraining the model. This mechanism is identified in this project as "Long Short Term Memory - daily prediction" and the way it works is by updating the model at the end of each day and then doing the prediction for the next day. In this way the new data also play a role for predicting the future data without training the model again. This is the mechanism in which can be reached the "spectacular" results mentioned above.
+However, the full potential of LSTM is reached if the dataset is periodically updated (ideally every day), that can help the model to get better predictions for the days ahead, without the need of retraining the model. This mechanism is identified in this project as "Long Short Term Memory - daily prediction" and the way it works is by updating the model at the end of each day and then doing the prediction for the next day. In this way the new data also play a role for predicting the future data without training the model again. This is the mechanism in which can be reached the "spectacular" results mentioned above.
 
-The refinement done for LTSM was the incorporation of those two options, 1) inferring future closing prices assuming they are unknown (or if the dataset has not being updated), similarly to the other models and which might be useful for long term predictions, and 2) taking advance of the updated dataset to do the predictions for the next or future days, basically it consist in constructing the subsequence used as predictor with updated data. Details of this implementation can be seen in the code of the function `predict` in the class `LongShortTermMemoryStockForecaster`.
+The refinement done for LSTM was the incorporation of those two options, 1) inferring future closing prices assuming they are unknown (or if the dataset has not being updated), similarly to the other models and which might be useful for long term predictions, and 2) taking advance of the updated dataset to do the predictions for the next or future days, basically it consist in constructing the subsequence used as predictor with updated data. Details of this implementation can be seen in the code of the function `predict` in the class `LongShortTermMemoryStockForecaster`.
+
+Also another important aspect of the refinement was tuning the parameters which are particular to each one of the three main models studied in this project: ARIMA, Prophet and LSTM. For linear regression there is not really anything to tune since the same algorithm can be seen as tuning the linear coefficients.
+
+In regards to ARIMA, there are three important parameters to tune [@stock_prices_prediction]:
+
+* `p`: Past values used for forecasting the next value.
+* `q`: Past forecast errors used to predict the future values.
+* `d`: Order of differencing.
+
+Parameter tuning for ARIMA consumes a lot of time, fortunately the module "Auto ARIMA" (used for this project) is available and has the advantage of automatically selecting the best combination of the values of (`p`, `q`, `d`) that provides the least error, this selection is done during the fitting/training process.
+
+In the case of Prophet, Facebook claims that the default settings produce forecasts that are often as accurate as those produced by skilled forecasters, then there was not a lot of room for improvement, with the exception of the parameter `daily_seasonality` that was turned on to match with the problems nature of forecasting in daily basis. With this parameter turned on, it was actually observed a small improvement in the RMSE of the predictions of around 10%.
+
+For the tuning of LSTM the list of parameters that were tuned during the refinement is described bellow:
+
+* The number of time steps: This is the size of the subsequences used as input for the model, a number too small would undermine the predictive power and a number too large would take a lot of space in the training set making it not suitable for small or moderate sets, the chosen value was 60 which was observed to offer a  good balance.
+* The number of layers in the architecture: LSTM layers seem to be very powerful that with just one layer (as in [@lstm_python_keras]) or two (as in [@stock_prices_prediction]) can produce good results, the higher the number of layers the more resources and time it takes to perform training and predictions. The selected number of layers for this implementation was 2, which produced better results than just one layer and offered a good balance in terms of time/resources compared to architectures with 3 or more layers.
+* The number of training epochs: LSTM surprisedly produced very low loss values in few training iterations, it was observed that just one epoch was not enough for the model to generalize, but for three or more epochs the training loss was so small that it was a clear symptom of overfitting (translated in not very satisfactory predictions during evaluation), the the number chosen was 2 for the number of training epochs.
 
 
 ## IV. Results
@@ -300,19 +344,11 @@ At the end more than creating a fixed predictor, the purpose of the project shif
 
 ### Justification
 
-To measure how the models improve (or worsen) against the benchmarking model (which is the Linear Regression) a ratio (expressed as percentage) of improvement is calculate with the following formula:
-$$ model\_improvement = (LinearRegression\_RMSE - Model\_RMSE) / LinearRegression\_RMSE $$
-
-The model improvement rate can be interpreted as follows:
-
-* A value of 1 (100%) means that the model has no error, then it was improved to perfection.
-* A value of 0 (0%) means that the model has the same performance than the linear regression, i.e. it was not improvement or worsening.
-* A positive value between 0 and 1 means that the model performs better than the liner regression, but still with some errors, the closer to 1 (100%) the smaller the errors in the predictions.
-* A negative value means that the performance of the model is worst than the linear regression.
-
-In figure \ref{random_eval_improvement} the rate/percentage of improvement against the benchmarking model (Linear Regression) is presented for the previous evaluation, this is organized per number of following trading days after the training end date, the methods that performed the best are highlighted in yellow.
+For the previous evaluation, in figure \ref{random_eval_improvement} are presented the improvement ratios (expressed in terms of percentage) against the benchmarking model (linear regression), the improvement ratio has been defined in the "Benchmark" section of this document.
 
 ![Improvement in regards to Linear Regression of evaluated models \label{random_eval_improvement}][random_eval_improvement]
+
+The results are organized per number of following trading days after the training end date, the methods that performed the best are highlighted in yellow.
 
 From those results it can be justified to rule out the method "Linear Regression - Date Components", since it does not really present an improvement, even in other evaluations included in the GitHub repository mentioned above it presents inconsistencies.
 
@@ -350,9 +386,9 @@ Additionally, the problem is very different to other machine learning problems s
 
 The results obtained when addressing the problem of predicting stock prices in the future just by using the data already known (and used in training) where not very encouraging. The methods/models used in this project ARIMA, Prophet and LSTM can at least give a tendency, which looks to be relevant in short term (up to around 10 weeks ahead), however the results does not seem to be precise enough to predict with certainty a stock closing price for a particular day.
 
-However, not everything is lost, with a variant on the mechanism for doing predictions, they can look way better, this is by using LTSM and periodically updating the dataset (ideally every day) and then doing the prediction for the next day, in this way the predictions for the next day would be more precise. Another advantage of LSTM is that retraining the model is not necessary, it was observed during the evaluation that after training the model this still gives good results for around 24 weeks ahead, it looks like even when the stock prices fluctuates LTSM can quickly adapt/correct the tendencies.
+However, not everything is lost, with a variant on the mechanism for doing predictions, they can look way better, this is by using LSTM and periodically updating the dataset (ideally every day) and then doing the prediction for the next day, in this way the predictions for the next day would be more precise. Another advantage of LSTM is that retraining the model is not necessary, it was observed during the evaluation that after training the model this still gives good results for around 24 weeks ahead, it looks like even when the stock prices fluctuates LSTM can quickly adapt/correct the tendencies.
 
-LTSM is not an easy algorithm to understand and then put in practice, there were some complications during its implementation, like implementing the preprocessing mechanism to create the sub-series used as predictors and the mechanism to take advance on the existing updated data to support the prediction process.
+LSTM is not an easy algorithm to understand and then put in practice, there were some complications during its implementation, like implementing the preprocessing mechanism to create the sub-series used as predictors and the mechanism to take advance on the existing updated data to support the prediction process.
 
 Originally in the proposal the idea of the final solution was creating a Python file to be used by the command line to perform the predictions, however the objective changed along the development of the project and instead shifted to provide a set of constructions (classes) able to be used in a Jupyter environment or similar, this is because it was realized that this kind of environments provide a more friendly framework to experiment and analyze the data, targeting it to be used for data scientists and/or (financial) data analysts.
 
